@@ -216,6 +216,9 @@ function addNewQuestion() {
     const correctAnswer = document.getElementById('correct-answer').value;
     const wrongAnswersInput = document.getElementById('wrong-answers').value;
 
+    // Reference the button element
+    const submitButton = document.querySelector('button[type="submit"]');
+
     // Split the wrong answers input by commas
     const wrongAnswersArray = wrongAnswersInput.split(',').map(answer => answer.trim());
 
@@ -241,15 +244,22 @@ function addNewQuestion() {
         document.getElementById('correct-answer').value = '';
         document.getElementById('wrong-answers').value = '';
 
-        // Remove the message after 3 seconds
+        // Reset the button's color
+        submitButton.style.backgroundColor = '';  // Reset to default color
+
+        // Remove the confirmation message after 3 seconds
         setTimeout(() => {
             confirmationMessage.remove();
         }, 3000);
-        
+
     } else {
         alert("Please enter exactly three wrong answers separated by commas.");
+
+        // Reset the button's color even if validation fails
+        submitButton.style.backgroundColor = '';  // Reset to default color
     }
 }
+
 
 
 // Call displayMenu when the page loads
