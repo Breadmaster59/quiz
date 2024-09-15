@@ -46,6 +46,11 @@ body {
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+.choice:hover {
+    background-color: #2980b9;
+    transform: translateY(-3px);
+}
+
 .choice:active {
     transform: translateY(0);
 }
@@ -76,6 +81,25 @@ body {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
     font-weight: bold;
+}
+
+/* Hover effect for larger screens */
+@media (min-width: 1280px) {
+    #quiz-container button:hover {
+        background-color: #27ae60;
+    }
+}
+
+/* Disable hover effect on touch devices */
+@media (hover: none) {
+    #quiz-container button:hover {
+        background-color: #181b19;
+    }
+}
+
+
+#quiz-container button:active {
+    transform: translateY(2px);
 }
 
 /* General Review Styling */
@@ -116,46 +140,26 @@ body {
 .styled-btn {
     background-color: #2ecc71; /* Green button */
     color: white;
-    padding: 15px;
+    padding: 12px; /* Reduced padding */
     font-size: 1rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
     margin: 10px;
-    width: 200px;
+    width: 100%; /* Ensure buttons take the full width available */
+    max-width: 200px; /* Limit button width */
     text-align: center;
 }
 
-/* Apply hover effects only on devices that support hover (e.g., desktops) */
-@media (hover: hover) {
-    .styled-btn:hover {
-        background-color: #27ae60; /* Darker green on hover */
-    }
-
-    .choice:hover {
-        background-color: #2980b9; /* Darker blue for choice buttons */
-    }
+.styled-btn:hover {
+    background-color: #27ae60; /* Darker green on hover */
 }
 
 .styled-btn:active {
     transform: translateY(2px);
 }
 
-/* Remove hover/active effects when .no-hover is applied */
-.no-hover .styled-btn,
-.no-hover .styled-btn:hover,
-.no-hover .styled-btn:active {
-    background-color: #2ecc71; /* Reset the background to original */
-    transform: none; /* Reset transform effects */
-}
-
-.no-hover .choice,
-.no-hover .choice:hover,
-.no-hover .choice:active {
-    background-color: #3498db; /* Reset for choice buttons */
-    transform: none;
-}
 /* Form Styling */
 form {
     display: flex;
@@ -187,12 +191,20 @@ input[type="text"] {
     font-weight: bold;
 }
 
-/* Only hover effects on devices that support hover */
-@media (hover: hover) {
+/* Hover effect for larger screens */
+@media (min-width: 1280px) {
     #main-menu-btn:hover {
         background-color: #2980b9;
     }
 }
+
+/* Disable hover effect on touch devices */
+@media (hover: none) {
+    #main-menu-btn:hover {
+        background-color: #181b19;
+    }
+}
+
 
 #main-menu-btn:active {
     transform: translateY(2px);
