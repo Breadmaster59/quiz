@@ -1,6 +1,4 @@
-const quizData = [
-
-];
+const quizData = [];
 
 let currentQuestion = 0;
 let correctAnswers = 0;
@@ -144,8 +142,6 @@ function displayMenu() {
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
 }
 
-
-
 // Function to start the quiz
 function startQuiz() {
     if (quizData.length === 0) {
@@ -179,7 +175,6 @@ function startQuiz() {
 // Ensure the Main Menu button takes the user back to the main menu
 document.getElementById('main-menu-btn').addEventListener('click', displayMenu);
 
-
 function displayAddQuestionForm() {
     const quizContainer = document.getElementById('quiz-container');
     quizContainer.innerHTML = `
@@ -209,7 +204,6 @@ function displayAddQuestionForm() {
         addNewQuestion();
     });
 }
-
 
 function addNewQuestion() {
     const newQuestion = document.getElementById('new-question').value;
@@ -251,6 +245,24 @@ function addNewQuestion() {
     }
 }
 
+// --- Add touch and hover fixes ---
+
+// Detect touch devices and apply no-hover class
+function handleTouch() {
+    document.body.classList.add('no-hover');
+}
+document.addEventListener('touchstart', handleTouch);
+
+// Reset button states after touch/click
+document.querySelectorAll('.styled-btn').forEach(button => {
+    button.addEventListener('touchend', function() {
+        this.style.backgroundColor = ''; // Reset background color after touch
+    });
+
+    button.addEventListener('click', function() {
+        this.style.backgroundColor = '';  // Reset background color after click
+    });
+});
 
 // Call displayMenu when the page loads
 displayMenu();

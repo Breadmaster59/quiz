@@ -142,6 +142,20 @@ body {
     transform: translateY(2px);
 }
 
+/* Remove hover/active effects when .no-hover is applied */
+.no-hover .styled-btn,
+.no-hover .styled-btn:hover,
+.no-hover .styled-btn:active {
+    background-color: #2ecc71; /* Reset the background to original */
+    transform: none; /* Reset transform effects */
+}
+
+.no-hover .choice,
+.no-hover .choice:hover,
+.no-hover .choice:active {
+    background-color: #3498db; /* Reset for choice buttons */
+    transform: none;
+}
 /* Form Styling */
 form {
     display: flex;
