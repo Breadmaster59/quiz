@@ -1,4 +1,6 @@
-const quizData = [];
+const quizData = [
+
+];
 
 let currentQuestion = 0;
 let correctAnswers = 0;
@@ -142,6 +144,8 @@ function displayMenu() {
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
 }
 
+
+
 // Function to start the quiz
 function startQuiz() {
     if (quizData.length === 0) {
@@ -172,11 +176,9 @@ function startQuiz() {
     loadQuiz();
 }
 
-// Ensure the Main Menu button takes the user back to the main menu and resets styles
-document.getElementById('main-menu-btn').addEventListener('click', function() {
-    displayMenu();
-    this.style.backgroundColor = '';  // Reset the button background color after click
-});
+// Ensure the Main Menu button takes the user back to the main menu
+document.getElementById('main-menu-btn').addEventListener('click', displayMenu);
+
 
 function displayAddQuestionForm() {
     const quizContainer = document.getElementById('quiz-container');
@@ -202,14 +204,12 @@ function displayAddQuestionForm() {
     document.getElementById('back-menu-btn').addEventListener('click', displayMenu);
 
     const form = document.getElementById('add-question-form');
-    const addQuestionButton = document.querySelector('button[type="submit"]');
-    
     form.addEventListener('submit', function(event) {
         event.preventDefault();
         addNewQuestion();
-        addQuestionButton.style.backgroundColor = '';  // Reset the button color after form submission
     });
 }
+
 
 function addNewQuestion() {
     const newQuestion = document.getElementById('new-question').value;
@@ -250,6 +250,7 @@ function addNewQuestion() {
         alert("Please enter exactly three wrong answers separated by commas.");
     }
 }
+
 
 // Call displayMenu when the page loads
 displayMenu();
