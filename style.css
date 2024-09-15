@@ -63,7 +63,7 @@ body {
 #quiz-container h2 {
     font-size: 2rem;
     margin-bottom: 20px;
-    color: #cc462e;
+    color: #2ecc71;
 }
 
 #quiz-container p {
@@ -148,31 +148,14 @@ body {
 
     .styled-btn:active {
         transform: translateY(2px);
+        background-color: #27ae60;  /* Darker green on active state */
     }
 }
 
-
-.styled-btn:hover {
-    background-color: #27ae60; /* Darker green on hover */
-}
-
-.styled-btn:active {
-    transform: translateY(2px);
-}
-
-/* Form Styling */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-input[type="text"] {
-    padding: 10px;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    width: 100%;
+/* Reset active state after tapping */
+.styled-btn:focus {
+    outline: none;  /* Remove outline after focus */
+    background-color: #2ecc71;  /* Reset the button to original background */
 }
 
 /* Main Menu Button */
@@ -197,6 +180,7 @@ input[type="text"] {
 
 #main-menu-btn:active {
     transform: translateY(2px);
+    background-color: #2980b9; /* Ensure color resets */
 }
 
 /* Button container styling */
@@ -212,7 +196,7 @@ input[type="text"] {
     text-align: center; /* Center only the button inside this div */
 }
 
-/* Mobile responsiveness */
+/* Mobile-specific styling */
 @media (max-width: 600px) {
     #quiz-container {
         padding: 15px; /* Smaller padding for mobile */
