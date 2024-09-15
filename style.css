@@ -1,0 +1,198 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#quiz-container {
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    text-align: center;
+}
+
+#question {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+#choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Choice buttons */
+.choice {
+    background-color: #3498db;
+    color: #fff;
+    padding: 15px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.choice:hover {
+    background-color: #2980b9;
+    transform: translateY(-3px);
+}
+
+.choice:active {
+    transform: translateY(0);
+}
+
+#quiz-container button[disabled] {
+    cursor: not-allowed;
+}
+
+/* Result styles */
+#quiz-container h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #2ecc71;
+}
+
+#quiz-container p {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+#quiz-container button {
+    background-color: #181b19;
+    color: rgb(255, 255, 255);
+    padding: 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+}
+
+#quiz-container button:hover {
+    background-color: #27ae60;
+}
+
+#quiz-container button:active {
+    transform: translateY(2px);
+}
+
+/* General Review Styling */
+.review-item {
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Card shadow */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px;
+    margin: 20px 0; /* Space between cards */
+    text-align: left;
+    transition: transform 0.3s ease; /* Add a subtle animation effect */
+}
+
+.review-item:hover {
+    transform: translateY(-5px); /* Slight hover lift effect */
+}
+
+/* Styling for the question */
+.review-question {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Styling for user's wrong answers */
+.wrong-answer {
+    color: #e74c3c; /* Red for wrong answers */
+    font-weight: bold;
+}
+
+/* Styling for correct answers */
+.correct-answer {
+    color: #2ecc71; /* Green for correct answers */
+    font-weight: bold;
+}
+
+/* General Button Styling */
+.styled-btn {
+    background-color: #2ecc71; /* Green button */
+    color: white;
+    padding: 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+.styled-btn:hover {
+    background-color: #27ae60; /* Darker green on hover */
+}
+
+.styled-btn:active {
+    transform: translateY(2px);
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input[type="text"] {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+
+#main-menu-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #000000;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+}
+
+#main-menu-btn:hover {
+    background-color: #2980b9;
+}
+
+#main-menu-btn:active {
+    transform: translateY(2px);
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center; /* Center them horizontally */
+    gap: 10px; /* Space between buttons */
+}
+
+.center-button {
+    text-align: center; /* Center only the button inside this div */
+}
+
