@@ -148,14 +148,31 @@ body {
 
     .styled-btn:active {
         transform: translateY(2px);
-        background-color: #27ae60;  /* Darker green on active state */
     }
 }
 
-/* Reset active state after tapping */
-.styled-btn:focus {
-    outline: none;  /* Remove outline after focus */
-    background-color: #2ecc71;  /* Reset the button to original background */
+
+.styled-btn:hover {
+    background-color: #27ae60; /* Darker green on hover */
+}
+
+.styled-btn:active {
+    transform: translateY(2px);
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input[type="text"] {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
 }
 
 /* Main Menu Button */
@@ -180,7 +197,6 @@ body {
 
 #main-menu-btn:active {
     transform: translateY(2px);
-    background-color: #2980b9; /* Ensure color resets */
 }
 
 /* Button container styling */
@@ -196,7 +212,7 @@ body {
     text-align: center; /* Center only the button inside this div */
 }
 
-/* Mobile-specific styling */
+/* Mobile responsiveness */
 @media (max-width: 600px) {
     #quiz-container {
         padding: 15px; /* Smaller padding for mobile */
