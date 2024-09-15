@@ -10,14 +10,16 @@ body {
     height: 100vh;
 }
 
+/* Container styling */
 #quiz-container {
     background-color: #fff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     width: 100%;
     max-width: 600px;
-    padding: 30px;
+    padding: 20px; /* Adjusted padding */
     text-align: center;
+    margin: 10px; /* Added margin to prevent it from touching edges */
 }
 
 #question {
@@ -36,8 +38,8 @@ body {
 .choice {
     background-color: #3498db;
     color: #fff;
-    padding: 15px;
-    font-size: 1.1rem;
+    padding: 12px; /* Reduced padding */
+    font-size: 1rem; /* Adjusted font size */
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -72,7 +74,7 @@ body {
 #quiz-container button {
     background-color: #181b19;
     color: rgb(255, 255, 255);
-    padding: 15px;
+    padding: 12px; /* Reduced padding */
     font-size: 1rem;
     border: none;
     border-radius: 8px;
@@ -127,14 +129,15 @@ body {
 .styled-btn {
     background-color: #2ecc71; /* Green button */
     color: white;
-    padding: 15px;
+    padding: 12px; /* Reduced padding */
     font-size: 1rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
     margin: 10px;
-    width: 200px;
+    width: 100%; /* Ensure buttons take the full width available */
+    max-width: 200px; /* Limit button width */
     text-align: center;
 }
 
@@ -161,7 +164,7 @@ input[type="text"] {
     width: 100%;
 }
 
-
+/* Main Menu Button */
 #main-menu-btn {
     position: fixed;
     top: 20px;
@@ -185,6 +188,7 @@ input[type="text"] {
     transform: translateY(2px);
 }
 
+/* Button container styling */
 .button-container {
     display: flex;
     flex-direction: column; /* Stack buttons vertically */
@@ -192,7 +196,21 @@ input[type="text"] {
     gap: 10px; /* Space between buttons */
 }
 
+/* Center specific buttons */
 .center-button {
     text-align: center; /* Center only the button inside this div */
 }
 
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    #quiz-container {
+        padding: 15px; /* Smaller padding for mobile */
+        margin: 10px;  /* Keep margin for mobile to avoid edge overlap */
+    }
+
+    .styled-btn, .choice {
+        padding: 10px; /* Smaller padding for buttons */
+        font-size: 0.9rem; /* Smaller font size for buttons */
+        max-width: 180px; /* Reduce button width for mobile */
+    }
+}
