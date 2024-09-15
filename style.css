@@ -46,11 +46,6 @@ body {
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.choice:hover {
-    background-color: #2980b9;
-    transform: translateY(-3px);
-}
-
 .choice:active {
     transform: translateY(0);
 }
@@ -81,14 +76,6 @@ body {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
     font-weight: bold;
-}
-
-#quiz-container button:hover {
-    background-color: #27ae60;
-}
-
-#quiz-container button:active {
-    transform: translateY(2px);
 }
 
 /* General Review Styling */
@@ -140,20 +127,15 @@ body {
     text-align: center;
 }
 
-/* Remove hover effects on mobile devices */
-@media (hover: hover) and (pointer: fine) {
+/* Apply hover effects only on devices that support hover (e.g., desktops) */
+@media (hover: hover) {
     .styled-btn:hover {
         background-color: #27ae60; /* Darker green on hover */
     }
 
-    .styled-btn:active {
-        transform: translateY(2px);
+    .choice:hover {
+        background-color: #2980b9; /* Darker blue for choice buttons */
     }
-}
-
-
-.styled-btn:hover {
-    background-color: #27ae60; /* Darker green on hover */
 }
 
 .styled-btn:active {
@@ -191,8 +173,11 @@ input[type="text"] {
     font-weight: bold;
 }
 
-#main-menu-btn:hover {
-    background-color: #2980b9;
+/* Only hover effects on devices that support hover */
+@media (hover: hover) {
+    #main-menu-btn:hover {
+        background-color: #2980b9;
+    }
 }
 
 #main-menu-btn:active {
