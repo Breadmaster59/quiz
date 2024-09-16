@@ -236,24 +236,32 @@ function loadQuizLogsFromFirebase() {
 
         const results = Object.values(data);
 
-        const logsContainer = document.getElementById('quiz-logs');
+        // Use the new container for quiz logs
+        const logsContainer = document.getElementById('quiz-results-container');
         logsContainer.innerHTML = ''; // Clear any previous logs
 
         results.slice(-5).forEach((result) => {
             const percentage = result.percentage;
-            const progressColor = percentage >= 75 ? 'green' : percentage >= 50 ? 'orange' : 'red'; // Green for 75%+, Orange for 50-75%, Red for below 50%
-            
+            const incorrectPercentage = 100 - percentage;
+
+            // Set color based on performance for the correct answers
+            const progressColor = percentage >= 75 ? 'green' : percentage >= 50 ? 'orange' : 'red';
+
             logsContainer.innerHTML += `
                 <div class="quiz-log">
                     <p>Quiz on: ${new Date(result.timestamp).toLocaleString()}</p>
-                    <div class="progress-bar" style="background-color: ${progressColor}; width: ${percentage}%;">
-                        ${percentage}% Correct
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar correct" style="background-color: ${progressColor}; width: ${percentage}%;"></div>
+                        <div class="progress-bar incorrect" style="background-color: red; width: ${incorrectPercentage}%;"></div>
                     </div>
+                    <p>${percentage}% Correct / ${incorrectPercentage}% Wrong</p>
                 </div>
             `;
         });
     });
 }
+
+
 
 
 
@@ -266,19 +274,19 @@ function displayMenu() {
     quizContainer.innerHTML = `
         <h2>Quiz Menu</h2>
         <p>Number of questions in the quiz: ${questionCount}</p>
-        <div id="quiz-logs"></div>
         <div class="button-container">
             <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
             <button id="add-question-btn" class="styled-btn">Add Question</button>
         </div>
     `;
 
-    // Load quiz logs from Firebase
-    loadQuizLogsFromFirebase();
-
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
+
+    // Load quiz logs in a separate container now
+    loadQuizLogsFromFirebase();
 }
+
 
 
 // Function to start the quiz

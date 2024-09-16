@@ -7,29 +7,30 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     height: 100vh;
+    width: 100%;
 }
 
 /* Container styling */
-#quiz-container {
+#quiz-container, #quiz-results-container {
     background-color: #fff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     width: 100%;
     max-width: 600px;
-    padding: 20px; /* Adjusted padding */
+    padding: 20px;
     text-align: center;
-    margin: 10px; /* Added margin to prevent it from touching edges */
+    margin: 10px 0;
 }
 
 #question-counter {
-    font-size: 1rem;      /* Matching font size with the rest of the quiz */
-    font-weight: bold;    /* Make it bold to stand out */
-    color: #333;          /* Match the text color with the rest of the quiz */
-    margin-top: 10px;     /* Add spacing above the counter */
-    text-align: left;     /* Align the counter to the left */
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+    text-align: left;
 }
-
 
 #question {
     font-size: 1.5rem;
@@ -37,9 +38,12 @@ body {
     color: #333;
 }
 
+/* Adjust to center answer choices properly */
 #choices {
     display: flex;
     flex-direction: column;
+    align-items: center; /* Center the buttons */
+    justify-content: center;
     gap: 10px;
 }
 
@@ -47,12 +51,15 @@ body {
 .choice {
     background-color: #3498db;
     color: #fff;
-    padding: 12px; /* Reduced padding */
-    font-size: 1rem; /* Adjusted font size */
+    padding: 12px;
+    font-size: 1rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100%; /* Full width of the container */
+    max-width: 300px; /* Limit button width */
+    text-align: center;
 }
 
 .choice:hover {
@@ -83,7 +90,7 @@ body {
 #quiz-container button {
     background-color: #181b19;
     color: rgb(255, 255, 255);
-    padding: 12px; /* Reduced padding */
+    padding: 12px;
     font-size: 1rem;
     border: none;
     border-radius: 8px;
@@ -106,7 +113,6 @@ body {
     }
 }
 
-
 #quiz-container button:active {
     transform: translateY(2px);
 }
@@ -114,55 +120,52 @@ body {
 /* General Review Styling */
 .review-item {
     background-color: #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Card shadow */
-    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
     padding: 20px;
-    margin: 20px 0; /* Space between cards */
+    margin: 20px 0;
     text-align: left;
-    transition: transform 0.3s ease; /* Add a subtle animation effect */
+    transition: transform 0.3s ease;
 }
 
 .review-item:hover {
-    transform: translateY(-5px); /* Slight hover lift effect */
+    transform: translateY(-5px);
 }
 
-/* Styling for the question */
 .review-question {
     font-size: 1.2rem;
     margin-bottom: 10px;
     color: #333;
 }
 
-/* Styling for user's wrong answers */
 .wrong-answer {
-    color: #e74c3c; /* Red for wrong answers */
+    color: #e74c3c;
     font-weight: bold;
 }
 
-/* Styling for correct answers */
 .correct-answer {
-    color: #2ecc71; /* Green for correct answers */
+    color: #2ecc71;
     font-weight: bold;
 }
 
 /* General Button Styling */
 .styled-btn {
-    background-color: #2ecc71; /* Green button */
+    background-color: #2ecc71;
     color: white;
-    padding: 12px; /* Reduced padding */
+    padding: 12px;
     font-size: 1rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
     margin: 10px;
-    width: 100%; /* Ensure buttons take the full width available */
-    max-width: 200px; /* Limit button width */
+    width: 100%;
+    max-width: 200px;
     text-align: center;
 }
 
 .styled-btn:hover {
-    background-color: #27ae60; /* Darker green on hover */
+    background-color: #27ae60;
 }
 
 .styled-btn:active {
@@ -174,7 +177,7 @@ form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 100%; /* Ensure the form fits within the container */
+    width: 100%;
 }
 
 input[type="text"] {
@@ -182,9 +185,9 @@ input[type="text"] {
     font-size: 1rem;
     border-radius: 5px;
     border: 1px solid #ccc;
-    width: calc(100% - 20px); /* Ensure the input field adjusts to the container size */
-    box-sizing: border-box;  /* Include padding and border in the element's total width */
-    margin: 0 auto;  /* Center the input field */
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 /* Main Menu Button */
@@ -192,7 +195,7 @@ input[type="text"] {
     position: fixed;
     top: 20px;
     left: 20px;
-    background-color: #000000;
+    background-color: #000;
     color: white;
     padding: 10px 20px;
     font-size: 1rem;
@@ -203,20 +206,17 @@ input[type="text"] {
     font-weight: bold;
 }
 
-/* Hover effect for larger screens */
 @media (min-width: 1280px) {
     #main-menu-btn:hover {
         background-color: #2980b9;
     }
 }
 
-/* Disable hover effect on touch devices */
 @media (hover: none) {
     #main-menu-btn:hover {
         background-color: #181b19;
     }
 }
-
 
 #main-menu-btn:active {
     transform: translateY(2px);
@@ -225,40 +225,78 @@ input[type="text"] {
 /* Button container styling */
 .button-container {
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
-    align-items: center; /* Center them horizontally */
-    gap: 10px; /* Space between buttons */
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Center specific buttons */
 .center-button {
-    text-align: center; /* Center only the button inside this div */
+    text-align: center;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
     #quiz-container {
-        padding: 15px; /* Smaller padding for mobile */
-        margin: 10px;  /* Keep margin for mobile to avoid edge overlap */
+        padding: 15px;
+        margin: 10px;
     }
 
     .styled-btn, .choice {
-        padding: 10px; /* Smaller padding for buttons */
-        font-size: 0.9rem; /* Smaller font size for buttons */
-        max-width: 180px; /* Reduce button width for mobile */
+        padding: 10px;
+        font-size: 0.9rem;
+        max-width: 180px;
     }
 }
 
+/* Quiz logs container styling */
+#quiz-logs-container {
+    margin-top: 30px;
+}
+
+#quiz-logs {
+    margin-top: 15px;
+}
+
 .quiz-log {
-    margin-bottom: 15px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-log p {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+}
+
+.progress-bar-wrapper {
+    display: flex;
+    width: 100%;
+    height: 25px;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
 }
 
 .progress-bar {
-    height: 25px;
-    border-radius: 5px;
-    color: white;
+    height: 100%;
     text-align: center;
     font-size: 14px;
-    line-height: 25px; /* Ensure text is vertically centered */
+    line-height: 25px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.correct {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.incorrect {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
