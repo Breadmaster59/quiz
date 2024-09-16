@@ -1,22 +1,54 @@
+console.log("load");
+
 let quizData = [];
 let shuffledQuizData = [];
 let currentQuestion = 0;
 let correctAnswers = 0;
 let wrongAnswers = [];
 
-// Firebase-related functions
+// Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+// Firebase config and initialization
+const firebaseConfig = {
+  apiKey: "AIzaSyCe0p8slJ9fIj0xX7jBXKQ9TdGCaWUXG0g",
+  authDomain: "quizquestionstorage.firebaseapp.com",
+  projectId: "quizquestionstorage",
+  storageBucket: "quizquestionstorage.appspot.com",
+  messagingSenderId: "449470008189",
+  appId: "1:449470008189:web:695d9c2c09bda45f0f1a14",
+  databaseURL: "https://quizquestionstorage-default-rtdb.europe-west1.firebasedatabase.app" // Updated to the correct region
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);  // Initialize the Realtime Database
+console.log("Firebase app and database initialized");
+
+// Function to add a new question to Firebase
+function addNewQuestionToFirebase(newQuizItem) {
+    console.log("Adding new question to Firebase:", newQuizItem);
+    const quizDataRef = ref(db, 'quizData');
+    push(quizDataRef, newQuizItem)
+        .then(() => console.log("New question successfully added to Firebase"))
+        .catch(error => console.error("Error adding question to Firebase:", error));
+}
 
 // Function to load quiz data from Firebase and display the menu after loading
 function loadQuizDataFromFirebase() {
+    console.log("Loading quiz data from Firebase...");
     const quizDataRef = ref(db, 'quizData');
     onValue(quizDataRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             quizData = Object.values(data);
             shuffledQuizData = shuffle([...quizData]);
+            console.log("Quiz data loaded:", quizData);  // Debug: log the loaded quiz data
+        } else {
+            console.log("No quiz data found in Firebase.");
         }
-        // Display the menu only after data is loaded
+        // Display the menu after data is loaded
         displayMenu();
     });
 }
@@ -31,9 +63,11 @@ function shuffle(array) {
 }
 
 // Load the quiz data from Firebase when the page loads
+console.log("Initializing app...");
 loadQuizDataFromFirebase();
 
 function loadQuiz() {
+    console.log("Loading quiz question...");
     const questionEl = document.getElementById('question');
     const choiceButtons = document.querySelectorAll('.choice');
 
@@ -41,6 +75,8 @@ function loadQuiz() {
     document.getElementById('next-btn-container').innerHTML = "";
 
     const currentQuiz = shuffledQuizData[currentQuestion];
+    console.log("Current quiz question:", currentQuiz);  // Debug: log the current question data
+
     const shuffledOptions = shuffle([...currentQuiz.options]);
 
     choiceButtons.forEach((btn) => {
@@ -60,6 +96,7 @@ function loadQuiz() {
 }
 
 function checkAnswer(selectedButton, correctAnswer, currentQuiz) {
+    console.log("Selected answer:", selectedButton.textContent);  // Debug: log selected answer
     const choiceButtons = document.querySelectorAll('.choice');
 
     choiceButtons.forEach(btn => {
@@ -75,12 +112,14 @@ function checkAnswer(selectedButton, correctAnswer, currentQuiz) {
 
     if (selectedButton.textContent === correctAnswer) {
         correctAnswers++;
+        console.log("Correct answer selected.");
     } else {
         wrongAnswers.push({
             question: currentQuiz.question,
             userAnswer: selectedButton.textContent,
             correctAnswer: correctAnswer
         });
+        console.log("Incorrect answer. Correct answer is:", correctAnswer);
     }
 
     // Show "Next" button after the question is answered
@@ -99,6 +138,7 @@ function checkAnswer(selectedButton, correctAnswer, currentQuiz) {
 }
 
 function showSummary() {
+    console.log("Showing quiz summary...");
     const quizContainer = document.getElementById('quiz-container');
     
     let summaryHTML = `
@@ -126,6 +166,7 @@ function showSummary() {
 }
 
 function restartQuiz() {
+    console.log("Restarting quiz...");
     currentQuestion = 0;
     correctAnswers = 0;
     wrongAnswers = [];
@@ -144,8 +185,10 @@ function restartQuiz() {
 }
 
 function displayMenu() {
+    console.log("Displaying menu...");
     const quizContainer = document.getElementById('quiz-container');
     const questionCount = quizData.length; // Get the number of questions
+    console.log("Number of questions in the quiz:", questionCount);  // Debug: log the number of questions
 
     quizContainer.innerHTML = `
         <h2>Quiz Menu</h2>
@@ -162,7 +205,9 @@ function displayMenu() {
 
 // Function to start the quiz
 function startQuiz() {
+    console.log("Starting quiz...");
     if (quizData.length === 0) {
+        console.log("No questions available. Cannot start quiz.");
         // Display a message if no questions are added
         document.getElementById('quiz-container').innerHTML = `
             <h2>No questions added yet!</h2>
@@ -194,6 +239,7 @@ function startQuiz() {
 document.getElementById('main-menu-btn').addEventListener('click', displayMenu);
 
 function displayAddQuestionForm() {
+    console.log("Displaying Add Question form...");
     const quizContainer = document.getElementById('quiz-container');
     quizContainer.innerHTML = `
         <h2>Add a New Question</h2>
@@ -225,6 +271,7 @@ function displayAddQuestionForm() {
 
 // Add new question to Firebase
 function addNewQuestion() {
+    console.log("Adding new question...");
     const newQuestion = document.getElementById('new-question').value;
     const correctAnswer = document.getElementById('correct-answer').value;
     const wrongAnswersInput = document.getElementById('wrong-answers').value;
@@ -257,8 +304,10 @@ function addNewQuestion() {
             confirmationMessage.remove();
         }, 3000);
     } else {
+        console.log("Invalid input. Three wrong answers are required.");
         alert("Please enter exactly three wrong answers separated by commas.");
     }
 }
 
 // Call displayMenu when the page loads
+displayMenu();

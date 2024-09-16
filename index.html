@@ -12,45 +12,8 @@
     <div id="quiz-container"></div>
     <!-- Main Menu button added outside the quiz container so it stays visible -->
     <button id="main-menu-btn" class="styled-btn">Main Menu</button>
-    <script src="quizhandler.js?v=1.2"></script>
-
-    <script type="module">
-        // Import the functions you need from the SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-      
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyCe0p8slJ9fIj0xX7jBXKQ9TdGCaWUXG0g",
-          authDomain: "quizquestionstorage.firebaseapp.com",
-          projectId: "quizquestionstorage",
-          storageBucket: "quizquestionstorage.appspot.com",
-          messagingSenderId: "449470008189",
-          appId: "1:449470008189:web:695d9c2c09bda45f0f1a14",
-          measurementId: "G-4SRY5CSD8K",
-          databaseURL: "https://quizquestionstorage-default-rtdb.firebaseio.com/" // Add your database URL here
-        };
-      
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);  // Initialize the Realtime Database
-      
-        // Function to add a new question to Firebase
-        function addNewQuestionToFirebase(newQuizItem) {
-          const quizDataRef = ref(db, 'quizData');
-          push(quizDataRef, newQuizItem);  // Push new question to the database
-        }
-      
-        // Function to load quiz data from Firebase
-        function loadQuizDataFromFirebase(callback) {
-          const quizDataRef = ref(db, 'quizData');
-          onValue(quizDataRef, (snapshot) => {
-            const data = snapshot.val();
-            const quizItems = Object.values(data);  // Extract the quiz items
-            callback(quizItems);  // Return the quiz data using a callback
-          });
-        }
-      </script>
+    <script type="module" src="quizhandler.js?v=1.2"></script>
+    
       
 </body>
 </html>
