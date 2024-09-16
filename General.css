@@ -450,8 +450,6 @@ h2 {
     #quiz-container {
         padding-top: 20px; /* Adjust padding since button is now within the flow */
     }
-}
-
 
     /* Adjust Other Buttons */
     .styled-btn, .choice {
