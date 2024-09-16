@@ -408,3 +408,29 @@ h2 {
     box-sizing: border-box;
   }
   
+
+
+  /* Mobile responsiveness */
+@media (max-width: 600px) {
+    /* Adjust quiz container */
+    #quiz-container {
+        padding: 15px;
+        margin: 10px;
+        padding-top: 70px; /* Add top padding to prevent overlap */
+    }
+
+    /* Adjust Main Menu button */
+    #main-menu-btn {
+        top: 10px; /* Reduce top spacing */
+        left: 10px; /* Reduce left spacing */
+        padding: 8px 16px; /* Reduce padding for smaller size */
+        font-size: 0.9rem; /* Adjust font size */
+    }
+
+    /* Adjust other buttons if necessary */
+    .styled-btn, .choice {
+        padding: 10px;
+        font-size: 0.9rem;
+        max-width: 180px;
+    }
+}
