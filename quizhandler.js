@@ -1,6 +1,24 @@
-const quizData = [
+let quizData = [];
 
-];
+// Fetch the quiz data from the JSON file
+async function loadQuizDataFromFile() {
+    const response = await fetch('questions.json');
+    quizData = await response.json();
+    shuffledQuizData = shuffle([...quizData]); // Shuffle the quiz data
+}
+
+// Shuffle function
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    }
+    return array;
+}
+
+// Call this function when the page loads
+loadQuizDataFromFile();
+
 
 let currentQuestion = 0;
 let correctAnswers = 0;
@@ -230,6 +248,9 @@ function addNewQuestion() {
         // Add the new question to the quizData array
         quizData.push(newQuizItem);
 
+        // Save the updated quiz data in localStorage (for temporary use in the session)
+        localStorage.setItem('quizData', JSON.stringify(quizData));
+
         // Display confirmation message
         const confirmationMessage = document.createElement('p');
         confirmationMessage.textContent = "New question added successfully!";
@@ -245,11 +266,28 @@ function addNewQuestion() {
         setTimeout(() => {
             confirmationMessage.remove();
         }, 3000);
+
+        // Allow the user to download the updated questions.json
+        downloadUpdatedQuizData();
         
     } else {
         alert("Please enter exactly three wrong answers separated by commas.");
     }
 }
+
+// Function to download the updated questions.json file
+function downloadUpdatedQuizData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quizData));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "questions.json");
+    document.body.appendChild(downloadAnchorNode); // Required for Firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+document.getElementById('download-json').addEventListener('click', downloadUpdatedQuizData);
+
 
 
 // Call displayMenu when the page loads
