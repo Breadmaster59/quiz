@@ -85,7 +85,20 @@ function loadQuiz() {
         btn.disabled = false;
     });
 
+    // Update question text
     questionEl.textContent = currentQuiz.question;
+
+    // Create or update the question counter element
+    let counterEl = document.getElementById('question-counter');
+    if (!counterEl) {
+        counterEl = document.createElement('div');
+        counterEl.id = 'question-counter';
+        questionEl.parentNode.insertBefore(counterEl, questionEl.nextSibling); // Append after the question
+    }
+
+    // Update the counter text
+    const remainingQuestions = shuffledQuizData.length - currentQuestion;
+    counterEl.textContent = `${remainingQuestions} question${remainingQuestions > 1 ? 's' : ''} left`;
 
     choiceButtons.forEach((btn, index) => {
         btn.textContent = shuffledOptions[index];
@@ -94,6 +107,9 @@ function loadQuiz() {
         };
     });
 }
+
+
+
 
 function checkAnswer(selectedButton, correctAnswer, currentQuiz) {
     console.log("Selected answer:", selectedButton.textContent);  // Debug: log selected answer

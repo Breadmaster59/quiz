@@ -22,6 +22,15 @@ body {
     margin: 10px; /* Added margin to prevent it from touching edges */
 }
 
+#question-counter {
+    font-size: 1rem;      /* Matching font size with the rest of the quiz */
+    font-weight: bold;    /* Make it bold to stand out */
+    color: #333;          /* Match the text color with the rest of the quiz */
+    margin-top: 10px;     /* Add spacing above the counter */
+    text-align: left;     /* Align the counter to the left */
+}
+
+
 #question {
     font-size: 1.5rem;
     margin-bottom: 20px;
