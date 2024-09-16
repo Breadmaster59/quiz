@@ -1,3 +1,7 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 /* General styles */
 body {
     font-family: 'Arial', sans-serif;
@@ -17,16 +21,17 @@ background: linear-gradient(to right, #155799, #159957); /* W3C, IE 10+/ Edge, F
 }
 
 /* Container styling */
-#quiz-container{
+#quiz-container {
     background-color: #ffffff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-    width: 100%;
-    max-width: 600px;
     padding: 20px;
     text-align: center;
-    margin: 10px 0;
+    margin: 10px auto;      /* Center the container with margins */
+    max-width: 600px;
+    width: 90%;             /* Set width less than 100% */
 }
+
 
 
 
@@ -240,17 +245,35 @@ input[type="text"] {
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
-    #quiz-container {
-        padding: 15px;
-        margin: 10px;
+    /* Adjust Main Menu Button */
+    #main-menu-btn {
+        position: static;     /* Remove fixed positioning */
+        margin: 0 auto 20px;  /* Center the button and add bottom margin */
+        display: block;       /* Ensure it's a block-level element */
+        width: fit-content;   /* Adjust width to fit content */
+        padding: 8px 16px;    /* Reduce padding for smaller size */
+        font-size: 0.9rem;    /* Adjust font size */
     }
 
+    /* Adjust Containers */
+    #quiz-container,
+    #quiz-results-container {
+        width: 90%;          /* Ensure width is less than 100% */
+        max-width: 500px;    /* Optional: limit max width */
+        margin: 10px auto;   /* Center the container */
+        padding: 15px;       /* Adjust padding if necessary */
+    }
+
+    /* Adjust Other Buttons */
     .styled-btn, .choice {
         padding: 10px;
         font-size: 0.9rem;
         max-width: 180px;
     }
 }
+
+
+
 
 /* Quiz logs container styling */
 #quiz-logs-container {
@@ -414,22 +437,21 @@ h2 {
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
-    /* Adjust Main Menu Button */
+    /* Remove fixed positioning */
     #main-menu-btn {
-        position: static;     /* Remove fixed positioning */
-        margin: 0 auto 20px;  /* Center the button and add bottom margin */
-        display: block;       /* Ensure it's a block-level element */
-        width: fit-content;   /* Adjust width to fit content */
-        padding: 8px 16px;    /* Reduce padding for smaller size */
-        font-size: 0.9rem;    /* Adjust font size */
+        position: relative; /* Change from fixed to relative */
+        top: 0;
+        left: 0;
+        margin: 10px auto; /* Center the button horizontally */
+        display: block; /* Ensure it takes up the full width available */
     }
 
-    /* Adjust Quiz Container */
+    /* Adjust quiz container padding */
     #quiz-container {
-        margin: 0 auto;       /* Center the container */
-        padding: 15px;        /* Add padding */
-        width: 100%;          /* Ensure full width on mobile */
+        padding-top: 20px; /* Adjust padding since button is now within the flow */
     }
+}
+
 
     /* Adjust Other Buttons */
     .styled-btn, .choice {
