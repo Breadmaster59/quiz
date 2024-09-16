@@ -153,6 +153,26 @@ function checkAnswer(selectedButton, correctAnswer, currentQuiz) {
     });
 }
 
+
+// Function to store quiz results in Firebase
+function storeQuizResultInFirebase(correctAnswers, totalQuestions) {
+    const quizResultsRef = ref(db, 'quizResults');
+    const timestamp = new Date().toISOString();
+    const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+    
+    const result = {
+        timestamp: timestamp,
+        correctAnswers: correctAnswers,
+        totalQuestions: totalQuestions,
+        percentage: percentage
+    };
+
+    push(quizResultsRef, result)
+        .then(() => console.log("Quiz result successfully stored in Firebase"))
+        .catch(error => console.error("Error storing quiz result in Firebase:", error));
+}
+
+
 function showSummary() {
     console.log("Showing quiz summary...");
     const quizContainer = document.getElementById('quiz-container');
@@ -178,8 +198,12 @@ function showSummary() {
 
     quizContainer.innerHTML = summaryHTML;
 
+    // Store the quiz result in Firebase
+    storeQuizResultInFirebase(correctAnswers, shuffledQuizData.length);
+
     document.getElementById('restart-btn').addEventListener('click', restartQuiz);
 }
+
 
 function restartQuiz() {
     console.log("Restarting quiz...");
@@ -200,6 +224,39 @@ function restartQuiz() {
     loadQuiz();
 }
 
+// Function to load quiz logs from Firebase and display them in the main menu
+function loadQuizLogsFromFirebase() {
+    const quizResultsRef = ref(db, 'quizResults');
+    onValue(quizResultsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            console.log("No quiz logs found in Firebase.");
+            return;
+        }
+
+        const results = Object.values(data);
+
+        const logsContainer = document.getElementById('quiz-logs');
+        logsContainer.innerHTML = ''; // Clear any previous logs
+
+        results.slice(-5).forEach((result) => {
+            const percentage = result.percentage;
+            const progressColor = percentage >= 75 ? 'green' : percentage >= 50 ? 'orange' : 'red'; // Green for 75%+, Orange for 50-75%, Red for below 50%
+            
+            logsContainer.innerHTML += `
+                <div class="quiz-log">
+                    <p>Quiz on: ${new Date(result.timestamp).toLocaleString()}</p>
+                    <div class="progress-bar" style="background-color: ${progressColor}; width: ${percentage}%;">
+                        ${percentage}% Correct
+                    </div>
+                </div>
+            `;
+        });
+    });
+}
+
+
+
 function displayMenu() {
     console.log("Displaying menu...");
     const quizContainer = document.getElementById('quiz-container');
@@ -209,15 +266,20 @@ function displayMenu() {
     quizContainer.innerHTML = `
         <h2>Quiz Menu</h2>
         <p>Number of questions in the quiz: ${questionCount}</p>
+        <div id="quiz-logs"></div>
         <div class="button-container">
             <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
             <button id="add-question-btn" class="styled-btn">Add Question</button>
         </div>
     `;
 
+    // Load quiz logs from Firebase
+    loadQuizLogsFromFirebase();
+
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
 }
+
 
 // Function to start the quiz
 function startQuiz() {
