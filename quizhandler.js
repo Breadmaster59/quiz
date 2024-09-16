@@ -311,7 +311,7 @@ function displayMenu() {
 
     quizContainer.innerHTML = `
         <h2>Quiz Menu</h2>
-        <p>Number of questions in the quiz: ${questionCount}</p>
+        <p id="question-count-text">Number of questions in the quiz: ${questionCount}</p>
         <div class="button-container">
             <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
             <button id="add-question-btn" class="styled-btn">Add Question</button>
