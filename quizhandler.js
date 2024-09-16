@@ -1,31 +1,27 @@
 let quizData = [];
-
-// Fetch the quiz data from the JSON file
-async function loadQuizDataFromFile() {
-    const response = await fetch('questions.json');
-    quizData = await response.json();
-    shuffledQuizData = shuffle([...quizData]); // Shuffle the quiz data
-}
-
-// Shuffle function
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]]; // Swap elements
-    }
-    return array;
-}
-
-// Call this function when the page loads
-loadQuizDataFromFile();
-
-
+let shuffledQuizData = [];
 let currentQuestion = 0;
 let correctAnswers = 0;
 let wrongAnswers = [];
-let shuffledQuizData = [];
 
-// Fisher-Yates shuffle algorithm to shuffle arrays
+// Firebase-related functions
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+// Function to load quiz data from Firebase and display the menu after loading
+function loadQuizDataFromFirebase() {
+    const quizDataRef = ref(db, 'quizData');
+    onValue(quizDataRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            quizData = Object.values(data);
+            shuffledQuizData = shuffle([...quizData]);
+        }
+        // Display the menu only after data is loaded
+        displayMenu();
+    });
+}
+
+// Function to shuffle an array (Fisher-Yates shuffle algorithm)
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -33,6 +29,9 @@ function shuffle(array) {
     }
     return array;
 }
+
+// Load the quiz data from Firebase when the page loads
+loadQuizDataFromFirebase();
 
 function loadQuiz() {
     const questionEl = document.getElementById('question');
@@ -42,7 +41,6 @@ function loadQuiz() {
     document.getElementById('next-btn-container').innerHTML = "";
 
     const currentQuiz = shuffledQuizData[currentQuestion];
-
     const shuffledOptions = shuffle([...currentQuiz.options]);
 
     choiceButtons.forEach((btn) => {
@@ -162,8 +160,6 @@ function displayMenu() {
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
 }
 
-
-
 // Function to start the quiz
 function startQuiz() {
     if (quizData.length === 0) {
@@ -197,7 +193,6 @@ function startQuiz() {
 // Ensure the Main Menu button takes the user back to the main menu
 document.getElementById('main-menu-btn').addEventListener('click', displayMenu);
 
-
 function displayAddQuestionForm() {
     const quizContainer = document.getElementById('quiz-container');
     quizContainer.innerHTML = `
@@ -228,30 +223,25 @@ function displayAddQuestionForm() {
     });
 }
 
-
+// Add new question to Firebase
 function addNewQuestion() {
     const newQuestion = document.getElementById('new-question').value;
     const correctAnswer = document.getElementById('correct-answer').value;
     const wrongAnswersInput = document.getElementById('wrong-answers').value;
 
-    // Split the wrong answers input by commas
     const wrongAnswersArray = wrongAnswersInput.split(',').map(answer => answer.trim());
 
     if (wrongAnswersArray.length === 3) {
-        // Create the new question object
         const newQuizItem = {
             question: newQuestion,
             correct: correctAnswer,
             options: [correctAnswer, ...wrongAnswersArray]
         };
 
-        // Add the new question to the quizData array
-        quizData.push(newQuizItem);
+        // Add the new question to Firebase
+        addNewQuestionToFirebase(newQuizItem);
 
-        // Save the updated quiz data in localStorage (for temporary use in the session)
-        localStorage.setItem('quizData', JSON.stringify(quizData));
-
-        // Display confirmation message
+        // Confirmation message
         const confirmationMessage = document.createElement('p');
         confirmationMessage.textContent = "New question added successfully!";
         confirmationMessage.style.color = "green";
@@ -266,29 +256,9 @@ function addNewQuestion() {
         setTimeout(() => {
             confirmationMessage.remove();
         }, 3000);
-
-        // Allow the user to download the updated questions.json
-        downloadUpdatedQuizData();
-        
     } else {
         alert("Please enter exactly three wrong answers separated by commas.");
     }
 }
 
-// Function to download the updated questions.json file
-function downloadUpdatedQuizData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quizData));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "questions.json");
-    document.body.appendChild(downloadAnchorNode); // Required for Firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-}
-
-document.getElementById('download-json').addEventListener('click', downloadUpdatedQuizData);
-
-
-
 // Call displayMenu when the page loads
-displayMenu();
