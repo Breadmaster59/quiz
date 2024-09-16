@@ -1,0 +1,71 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Container styling */
+#quiz-container, #quiz-results-container {
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* Main Menu Button */
+#main-menu-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #000;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+}
+
+@media (min-width: 1280px) {
+    #main-menu-btn:hover {
+        background-color: #2980b9;
+    }
+}
+
+@media (hover: none) {
+    #main-menu-btn:hover {
+        background-color: #181b19;
+    }
+}
+
+#main-menu-btn:active {
+    transform: translateY(2px);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    #quiz-container {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .styled-btn, .choice {
+        padding: 10px;
+        font-size: 0.9rem;
+        max-width: 180px;
+    }
+}
