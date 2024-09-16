@@ -5,10 +5,13 @@ let shuffledQuizData = [];
 let currentQuestion = 0;
 let correctAnswers = 0;
 let wrongAnswers = [];
+let isEditingQuestions = false;
+
 
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
 
 // Firebase config and initialization
 const firebaseConfig = {
@@ -42,16 +45,28 @@ function loadQuizDataFromFirebase() {
     onValue(quizDataRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            quizData = Object.values(data);
+            quizData = [];
+            for (let key in data) {
+                quizData.push({
+                    key: key,
+                    ...data[key]
+                });
+            }
             shuffledQuizData = shuffle([...quizData]);
             console.log("Quiz data loaded:", quizData);  // Debug: log the loaded quiz data
         } else {
             console.log("No quiz data found in Firebase.");
+            quizData = []; // Ensure quizData is empty if no data is found
         }
-        // Display the menu after data is loaded
-        displayMenu();
+        // Display the appropriate view after data is loaded
+        if (isEditingQuestions) {
+            displayEditQuestions();
+        } else {
+            displayMenu();
+        }
     });
 }
+
 
 // Function to shuffle an array (Fisher-Yates shuffle algorithm)
 function shuffle(array) {
@@ -224,9 +239,19 @@ function restartQuiz() {
     loadQuiz();
 }
 
+
+
 // Function to load quiz logs from Firebase and display them in the main menu
 function loadQuizLogsFromFirebase() {
     const quizResultsRef = ref(db, 'quizResults');
+    const logsContainer = document.getElementById('quiz-results-container');
+
+    // Add a title to the quiz results container, like "Previous Games"
+    logsContainer.innerHTML = `
+        <h2>Previous Games</h2>
+        <div id="quiz-logs"></div>
+    `;
+
     onValue(quizResultsRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) {
@@ -236,25 +261,33 @@ function loadQuizLogsFromFirebase() {
 
         const results = Object.values(data);
 
-        // Use the new container for quiz logs
-        const logsContainer = document.getElementById('quiz-results-container');
-        logsContainer.innerHTML = ''; // Clear any previous logs
+        // Sort results by timestamp in descending order (most recent first)
+        results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        results.slice(-5).forEach((result) => {
+        const quizLogs = document.getElementById('quiz-logs');
+        quizLogs.innerHTML = ''; // Clear previous logs
+
+        // Display the top 5 most recent results
+        results.slice(0, 5).forEach((result) => {
             const percentage = result.percentage;
             const incorrectPercentage = 100 - percentage;
 
-            // Set color based on performance for the correct answers
-            const progressColor = percentage >= 75 ? 'green' : percentage >= 50 ? 'orange' : 'red';
+            // Use gradients for the progress bars
+            const correctGradient = `linear-gradient(90deg, #32CD32, #3CB371)`; // Green gradient
+            const incorrectGradient = `linear-gradient(90deg, #FF6347, #FF4500)`; // Red gradient
 
-            logsContainer.innerHTML += `
+            quizLogs.innerHTML += `
                 <div class="quiz-log">
-                    <p>Quiz on: ${new Date(result.timestamp).toLocaleString()}</p>
+                    <p class="log-title"><strong>Quiz Date:</strong> ${new Date(result.timestamp).toLocaleString()}</p>
                     <div class="progress-bar-wrapper">
-                        <div class="progress-bar correct" style="background-color: ${progressColor}; width: ${percentage}%;"></div>
-                        <div class="progress-bar incorrect" style="background-color: red; width: ${incorrectPercentage}%;"></div>
+                        <div class="progress-bar correct" style="background: ${correctGradient}; width: ${percentage}%;"></div>
+                        <div class="progress-bar incorrect" style="background: ${incorrectGradient}; width: ${incorrectPercentage}%;"></div>
                     </div>
-                    <p>${percentage}% Correct / ${incorrectPercentage}% Wrong</p>
+                    <p class="log-stats">
+                        <span class="correct-answer-text">${percentage}% Correct</span> 
+                        <span class="divider">|</span> 
+                        <span class="wrong-answer-text">${incorrectPercentage}% Wrong</span>
+                    </p>
                 </div>
             `;
         });
@@ -265,11 +298,16 @@ function loadQuizLogsFromFirebase() {
 
 
 
+
+
 function displayMenu() {
+    if (isEditingQuestions) {
+        displayEditQuestions();
+        return;
+    }
     console.log("Displaying menu...");
     const quizContainer = document.getElementById('quiz-container');
     const questionCount = quizData.length; // Get the number of questions
-    console.log("Number of questions in the quiz:", questionCount);  // Debug: log the number of questions
 
     quizContainer.innerHTML = `
         <h2>Quiz Menu</h2>
@@ -277,14 +315,169 @@ function displayMenu() {
         <div class="button-container">
             <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
             <button id="add-question-btn" class="styled-btn">Add Question</button>
+            <button id="edit-questions-btn" class="styled-btn">Edit Existing Questions</button>
         </div>
     `;
 
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
+    document.getElementById('edit-questions-btn').addEventListener('click', displayEditQuestions);
+    loadQuizLogsFromFirebase()
+}
 
-    // Load quiz logs in a separate container now
-    loadQuizLogsFromFirebase();
+function displayEditQuestions() {
+    isEditingQuestions = true; // Set edit mode
+    console.log("Displaying existing questions for editing...");
+
+    const quizContainer = document.getElementById('quiz-container');
+    let contentHTML = `<h2>Edit Existing Questions</h2>`;
+
+    if (quizData.length === 0) {
+        contentHTML += `<p>No questions available to edit.</p>`;
+    } else {
+        quizData.forEach((quizItem) => {
+            contentHTML += `
+                <div class="edit-question-item">
+                    <p><strong>Question:</strong> ${quizItem.question}</p>
+                    <p><strong>Options:</strong> ${quizItem.options.join(', ')}</p>
+                    <button class="styled-btn edit-btn" data-key="${quizItem.key}">Edit</button>
+                    <button class="styled-btn remove-btn" data-key="${quizItem.key}">Remove</button>
+                </div>
+            `;
+        });
+    }
+
+    contentHTML += `<button id="back-menu-btn" class="styled-btn">Back to Menu</button>`;
+    quizContainer.innerHTML = contentHTML;
+
+    document.getElementById('main-menu-btn').addEventListener('click', () => {
+        isEditingQuestions = false;
+        displayMenu();
+    });
+
+    // Attach event listeners
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const key = this.getAttribute('data-key');
+            editQuestion(key);
+        });
+    });
+
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const key = this.getAttribute('data-key');
+            removeQuestion(key);
+        });
+    });
+
+    document.getElementById('back-menu-btn').addEventListener('click', () => {
+        isEditingQuestions = false; // Exit edit mode
+        displayMenu();
+    });
+}
+
+
+
+
+function editQuestion(key) {
+    const quizItem = quizData.find(item => item.key === key);
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.innerHTML = `
+        <h2>Edit Question</h2>
+        <form id="edit-question-form">
+            <label for="edit-question">Question:</label>
+            <input type="text" id="edit-question" value="${quizItem.question}" required>
+
+            <label for="edit-correct-answer">Correct Answer:</label>
+            <input type="text" id="edit-correct-answer" value="${quizItem.correct}" required>
+
+            <label for="edit-wrong-answers">Wrong Answers (separated by commas):</label>
+            <input type="text" id="edit-wrong-answers" value="${quizItem.options.filter(opt => opt !== quizItem.correct).join(', ')}" required>
+
+            <div class="center-button">
+                <button type="submit" class="styled-btn">Save Changes</button>
+            </div>
+        </form>
+        <button id="back-edit-questions-btn" class="styled-btn">Back to Edit Questions</button>
+    `;
+
+    document.getElementById('back-edit-questions-btn').addEventListener('click', displayEditQuestions);
+
+    const form = document.getElementById('edit-question-form');
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        saveQuestionChanges(key);
+    });
+}
+
+
+
+function removeQuestion(key) {
+    // Show the confirmation modal
+    showConfirmationModal("Are you sure you want to delete this question?", () => {
+        // User clicked "Yes"
+        const quizDataRef = ref(db, `quizData/${key}`);
+        remove(quizDataRef)
+            .then(() => {
+                console.log("Question removed successfully from Firebase");
+                // The data will be reloaded automatically due to the onValue listener
+            })
+            .catch(error => console.error("Error removing question:", error));
+    });
+}
+
+
+function showConfirmationModal(message, onConfirm) {
+    // Update the modal message
+    document.getElementById('modal-message').textContent = message;
+
+    // Show the modal
+    const modal = document.getElementById('confirmation-modal');
+    modal.style.display = 'flex';
+
+    // Attach event listeners to the buttons
+    const yesButton = document.getElementById('modal-yes-btn');
+    const noButton = document.getElementById('modal-no-btn');
+
+    // Remove any existing event listeners to prevent duplicate handlers
+    yesButton.onclick = null;
+    noButton.onclick = null;
+
+    yesButton.addEventListener('click', () => {
+        // Hide the modal
+        modal.style.display = 'none';
+        // Execute the confirmation callback
+        onConfirm();
+    });
+
+    noButton.addEventListener('click', () => {
+        // Hide the modal
+        modal.style.display = 'none';
+        // Optional: Execute any additional logic for "No" response
+    });
+}
+
+
+
+function saveQuestionChanges(key) {
+    const updatedQuestion = document.getElementById('edit-question').value;
+    const updatedCorrectAnswer = document.getElementById('edit-correct-answer').value;
+    const updatedWrongAnswers = document.getElementById('edit-wrong-answers').value.split(',').map(answer => answer.trim());
+
+    const updatedQuizItem = {
+        question: updatedQuestion,
+        correct: updatedCorrectAnswer,
+        options: [updatedCorrectAnswer, ...updatedWrongAnswers]
+    };
+
+    // Update the question in Firebase
+    const quizDataRef = ref(db, `quizData/${key}`);
+    set(quizDataRef, updatedQuizItem)
+        .then(() => {
+            console.log("Question updated successfully in Firebase");
+            // UI will update automatically due to onValue listener
+        })
+        .catch(error => console.error("Error updating question:", error));
 }
 
 
