@@ -210,7 +210,7 @@ input[type="text"] {
 #logout-btn {
     position: fixed;
     top: 20px;
-    left: 150px; /* Adjust this value based on how far you want the Log Out button from the Main Menu button */
+    left: 200px; /* Adjust this value based on how far you want the Log Out button from the Main Menu button */
     background-color: #000;
     color: white;
     padding: 10px 20px;
