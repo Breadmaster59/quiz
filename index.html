@@ -7,9 +7,37 @@
 
     
     <title>Quiz App</title>
-    <link rel="stylesheet" href="General.css?v=1.4">
+    <link rel="stylesheet" href="General.css?v=1.5">
 </head>
 <body>
+
+<!-- Login Form -->
+<div id="login-container" style="display:none;">
+  <h2>Log In</h2>
+  <form id="login-form">
+      <label for="login-email">Email:</label>
+      <input type="email" id="login-email" required>
+      <label for="login-password">Password:</label>
+      <input type="password" id="login-password" required>
+      <button type="submit" class="styled-btn">Log In</button>
+  </form>
+  <p>Don't have an account? <a href="#" id="show-sign-up-form">Sign Up</a></p>
+</div>
+
+  <!-- Sign-Up Form -->
+  <div id="sign-up-container">
+    <h2>Sign Up</h2>
+    <form id="sign-up-form">
+        <label for="sign-up-email">Email:</label>
+        <input type="email" id="sign-up-email" required>
+        <label for="sign-up-password">Password:</label>
+        <input type="password" id="sign-up-password" required>
+        <button type="submit" class="styled-btn">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="#" id="show-login-form">Log In</a></p>
+  </div>
+
+
     <button id="main-menu-btn" class="styled-btn">Main Menu</button>
     <div id="quiz-container"></div>
 
@@ -18,7 +46,7 @@
     </div>
 
     <!-- Main Menu button added outside the quiz container so it stays visible -->
-    <script type="module" src="quizhandler.js?v=1.6"></script>
+    <script type="module" src="quizhandler.js?v=1.7"></script>
 
     <div id="confirmation-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">

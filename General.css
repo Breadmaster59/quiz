@@ -459,3 +459,8 @@ h2 {
     }
 }
 
+#quiz-container,
+#quiz-results-container,
+#main-menu-btn {
+    display: none;
+}

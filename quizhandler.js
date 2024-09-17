@@ -7,16 +7,23 @@ let currentQuestion = 0;
 let correctAnswers = 0;
 let wrongAnswers = [];
 let isEditingQuestions = false;
+let quizDataRef = null;
+let quizDataListener = null;
+let quizLogsRef = null;
+let quizLogsListener = null;
 
-let currentUser = null; // Holds the key of the currently selected user
+
+let currentUser = null; // Holds the UID of the currently authenticated user
 
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, off, set, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+
 
 // Firebase config and initialization
 const firebaseConfig = {
-    apiKey: "AIzaSyCe0p8slJ9fIj0xX7jBXKQ9TdGCaWUXG0g",
+    apiKey: "AIzaSyAfG-L_fgyuOpYV3__RZrRM3pliaUA4xh8",
     authDomain: "quizquestionstorage.firebaseapp.com",
     projectId: "quizquestionstorage",
     storageBucket: "quizquestionstorage.appspot.com",
@@ -25,10 +32,127 @@ const firebaseConfig = {
     databaseURL: "https://quizquestionstorage-default-rtdb.europe-west1.firebasedatabase.app" // Updated to the correct region
   };
 
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);  // Initialize the Realtime Database
 console.log("Firebase app and database initialized");
+
+// Initialize Firebase Authentication
+const auth = getAuth(app);
+
+// Function to handle user sign-up
+function handleSignUp(event) {
+    event.preventDefault();
+    const email = document.getElementById('sign-up-email').value;
+    const password = document.getElementById('sign-up-password').value;
+
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Sign-up successful
+            const user = userCredential.user;
+            console.log("User signed up:", user.uid);
+            currentUser = user.uid;
+            // Load user data
+            loadUserData();
+        })
+        .catch((error) => {
+            console.error("Error signing up:", error);
+            alert(error.message);
+        });
+}
+
+// Event listener for sign-up form submission
+document.getElementById('sign-up-form').addEventListener('submit', handleSignUp);
+
+// Function to handle user login
+function handleLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Login successful
+            const user = userCredential.user;
+            console.log("User logged in:", user.uid);
+            currentUser = user.uid;
+            // Load user data
+            loadUserData();
+        })
+        .catch((error) => {
+            console.error("Error logging in:", error);
+            alert(error.message);
+        });
+}
+
+// Event listener for login form submission
+document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // User is signed in
+        currentUser = user.uid;
+        console.log("User ID:", currentUser);
+
+        // Hide login/sign-up forms
+        document.getElementById('sign-up-container').style.display = 'none';
+        document.getElementById('login-container').style.display = 'none';
+
+        // Show the quiz containers and Main Menu button
+        document.getElementById('quiz-container').style.display = 'block';
+        document.getElementById('quiz-results-container').style.display = 'block';
+        document.getElementById('main-menu-btn').style.display = 'block';
+
+        // Load user data
+        loadUserData();
+    } else {
+        // User is signed out
+        console.log("User is signed out");
+
+        // Remove database listeners before setting currentUser to null
+        if (quizDataListener && quizDataRef) {
+            off(quizDataRef, 'value', quizDataListener);
+            quizDataListener = null;
+            quizDataRef = null;
+        }
+
+        if (quizLogsListener && quizLogsRef) {
+            off(quizLogsRef, 'value', quizLogsListener);
+            quizLogsListener = null;
+            quizLogsRef = null;
+        }
+
+        // Clear local variables
+        currentUser = null;
+        quizData = [];
+        shuffledQuizData = [];
+        currentQuestion = 0;
+        correctAnswers = 0;
+        wrongAnswers = [];
+        isEditingQuestions = false;
+
+        // Clear UI elements
+        document.getElementById('quiz-container').innerHTML = '';
+        document.getElementById('quiz-results-container').innerHTML = '';
+
+        // Hide the quiz containers and Main Menu button
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('quiz-results-container').style.display = 'none';
+        document.getElementById('main-menu-btn').style.display = 'none';
+
+        // Show the login form and hide the sign-up form (as per your preference)
+        document.getElementById('sign-up-container').style.display = 'none';
+        document.getElementById('login-container').style.display = 'block';
+
+        // Clear the password field in the login form
+        document.getElementById('login-password').value = '';
+    }
+});
+
+
+
 
 // Function to shuffle an array (Fisher-Yates shuffle algorithm)
 function shuffle(array) {
@@ -39,121 +163,27 @@ function shuffle(array) {
     return array;
 }
 
-// Function to display the user selection screen
-function displayUserSelection() {
-    console.log("Displaying user selection screen...");
-    const quizContainer = document.getElementById('quiz-container');
-    quizContainer.innerHTML = `
-        <h2>Select User</h2>
-        <div class="button-container">
-            <button id="add-user-btn" class="styled-btn">Add User</button>
-            <button id="select-user-btn" class="styled-btn">Select Existing User</button>
-        </div>
-    `;
-
-    document.getElementById('add-user-btn').addEventListener('click', displayAddUserForm);
-    document.getElementById('select-user-btn').addEventListener('click', displayExistingUsers);
-}
-
-// Function to display the Add User form
-function displayAddUserForm() {
-    console.log("Displaying add user form...");
-    const quizContainer = document.getElementById('quiz-container');
-
-    quizContainer.innerHTML = `
-        <h2>Add New User</h2>
-        <form id="add-user-form">
-            <label for="username">Username:</label>
-            <input type="text" id="username" required>
-            <div class="center-button">
-                <button type="submit" class="styled-btn">Create User</button>
-            </div>
-        </form>
-        <button id="back-user-selection-btn" class="styled-btn">Back to User Selection</button>
-    `;
-
-    document.getElementById('back-user-selection-btn').addEventListener('click', displayUserSelection);
-
-    document.getElementById('add-user-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        addNewUser();
-    });
-}
-
-// Function to add a new user to Firebase
-function addNewUser() {
-    const username = document.getElementById('username').value.trim();
-    if (username === '') {
-        alert('Please enter a username.');
-        return;
-    }
-
-    const usersRef = ref(db, 'users');
-    const newUserRef = push(usersRef);
-    set(newUserRef, { username: username })
-        .then(() => {
-            console.log("User added successfully to Firebase");
-            currentUser = newUserRef.key;
-            loadQuizDataFromFirebase(); // Load the user's quizzes
-        })
-        .catch(error => console.error("Error adding user:", error));
-}
-
-// Function to display existing users
-function displayExistingUsers() {
-    console.log("Displaying existing users...");
-    const quizContainer = document.getElementById('quiz-container');
-
-    // Fetch users from Firebase
-    const usersRef = ref(db, 'users');
-    get(usersRef).then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            let contentHTML = `<h2>Select Existing User</h2>`;
-            for (let key in data) {
-                contentHTML += `
-                    <div class="user-item">
-                        <p><strong>Username:</strong> ${data[key].username}</p>
-                        <button class="styled-btn select-user-btn" data-key="${key}">Select User</button>
-                    </div>
-                `;
-            }
-            contentHTML += `<button id="back-user-selection-btn" class="styled-btn">Back to User Selection</button>`;
-            quizContainer.innerHTML = contentHTML;
-
-            // Attach event listeners
-            document.querySelectorAll('.select-user-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const key = this.getAttribute('data-key');
-                    selectUser(key);
-                });
-            });
-
-            document.getElementById('back-user-selection-btn').addEventListener('click', displayUserSelection);
-        } else {
-            quizContainer.innerHTML = `
-                <h2>No Users Found</h2>
-                <p>Please add a new user.</p>
-                <button id="back-user-selection-btn" class="styled-btn">Back to User Selection</button>
-            `;
-            document.getElementById('back-user-selection-btn').addEventListener('click', displayUserSelection);
-        }
-    }).catch(error => console.error("Error fetching users:", error));
-}
-
-// Function to set the current user and load their quiz data
-function selectUser(key) {
-    currentUser = key;
-    console.log("Selected user with key:", key);
-    loadQuizDataFromFirebase(); // Load the user's quizzes
+// Function to load user data
+function loadUserData() {
+    console.log(`Loading data for user: ${currentUser}...`);
+    // Load user's data
+    loadQuizDataFromFirebase();
 }
 
 // Function to load quiz data from Firebase and display the menu after loading
 function loadQuizDataFromFirebase() {
-    if (!currentUser) return; // Ensure a user is selected
+    if (!currentUser) return; // Ensure a user is signed in
     console.log("Loading quiz data from Firebase for user:", currentUser);
-    const quizDataRef = ref(db, `users/${currentUser}/quizzes`);
-    onValue(quizDataRef, (snapshot) => {
+
+    // If a previous listener exists, remove it
+    if (quizDataListener && quizDataRef) {
+        off(quizDataRef, 'value', quizDataListener);
+    }
+
+    quizDataRef = ref(db, `users/${currentUser}/quizzes`);
+
+    // Use 'onValue' to listen for real-time updates
+    quizDataListener = onValue(quizDataRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             quizData = [];
@@ -169,56 +199,73 @@ function loadQuizDataFromFirebase() {
             console.log("No quiz data found for the user.");
             quizData = [];
         }
-        // Display the appropriate view after data is loaded
-        if (isEditingQuestions) {
-            displayEditQuestions();
+        // Update the question count in the menu if necessary
+        updateQuestionCount();
+        // Call displayMenu() after data is loaded
+        displayMenu();
+    }, (error) => {
+        if (error.code === 'PERMISSION_DENIED') {
+            console.warn("Permission denied when accessing quiz data. User may have signed out.");
+            // Optionally, you can perform additional cleanup or UI updates here
         } else {
-            displayMenu();
+            console.error("Error loading quiz data:", error);
         }
     });
 }
 
+
 // Function to display the main quiz menu
 function displayMenu() {
-    if (isEditingQuestions) {
-        displayEditQuestions();
-        return;
-    }
     if (!currentUser) {
-        displayUserSelection();
+        console.log("No user is signed in. Cannot display menu.");
         return;
     }
+
+    // Reset editing mode (optional redundancy)
+    isEditingQuestions = false;
+
     console.log("Displaying menu...");
     const quizContainer = document.getElementById('quiz-container');
     const questionCount = quizData.length; // Get the number of questions
 
-    // Fetch current user's name from Firebase
-    const userRef = ref(db, `users/${currentUser}/username`);
-    get(userRef).then((snapshot) => {
-        const username = snapshot.val() || 'User';
-        quizContainer.innerHTML = `
-            <h2>Quiz Menu</h2>
-            <p>Welcome, ${username}!</p>
-            <p id="question-count-text">Number of questions in your quiz: ${questionCount}</p>
-            <div class="button-container">
-                <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
-                <button id="add-question-btn" class="styled-btn">Add Question</button>
-                <button id="edit-questions-btn" class="styled-btn">Edit Existing Questions</button>
-                <button id="switch-user-btn" class="styled-btn">Switch User</button>
-            </div>
-        `;
+    quizContainer.innerHTML = `
+        <h2>Quiz Menu</h2>
+        <p>Welcome!</p>
+        <p id="question-count-text">Number of questions in your quiz: ${questionCount}</p>
+        <div class="button-container">
+            <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
+            <button id="add-question-btn" class="styled-btn">Add Question</button>
+            <button id="edit-questions-btn" class="styled-btn">Edit Existing Questions</button>
+            <button id="reset-app-btn" class="styled-btn">Log Out</button>
+        </div>
+    `;
 
-        document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
-        document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
-        document.getElementById('edit-questions-btn').addEventListener('click', displayEditQuestions);
-        document.getElementById('switch-user-btn').addEventListener('click', () => {
-            currentUser = null;
-            quizData = [];
-            displayUserSelection();
-        });
-        loadQuizLogsFromFirebase();
-    }).catch(error => console.error("Error fetching user data:", error));
+    // Attach event listeners to the menu buttons
+    document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
+    document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
+    document.getElementById('edit-questions-btn').addEventListener('click', displayEditQuestions);
+    document.getElementById('reset-app-btn').addEventListener('click', resetApp);
+
+    // Optionally, load quiz logs
+    loadQuizLogsFromFirebase();
 }
+
+
+// Function to reset the app (sign out the user)
+function resetApp() {
+    signOut(auth)
+        .then(() => {
+            console.log("User signed out");
+            // The rest of the cleanup is handled in onAuthStateChanged
+        })
+        .catch((error) => {
+            console.error("Error signing out:", error);
+        });
+}
+
+
+
+
 
 // Function to display the Add Question form
 function displayAddQuestionForm() {
@@ -234,7 +281,7 @@ function displayAddQuestionForm() {
             <input type="text" id="correct-answer" placeholder="Enter the correct answer" required>
 
             <label for="wrong-answers">Wrong Answers (separated by commas):</label>
-            <input type="text" id="wrong-answers" placeholder="david, greg, daryll" required>
+            <input type="text" id="wrong-answers" placeholder="Option 1, Option 2, Option 3" required>
 
             <div class="center-button">
                 <button type="submit" class="styled-btn">Add Question</button>
@@ -294,13 +341,24 @@ function addNewQuestion() {
 
 // Function to add a new question to Firebase under the current user
 function addNewQuestionToFirebase(newQuizItem) {
-    if (!currentUser) return; // Ensure a user is selected
-    console.log("Adding new question to Firebase:", newQuizItem);
+    if (!currentUser) return; // Ensure a user is signed in
+    console.log("Adding new question to Firebase for user:", currentUser);
     const quizzesRef = ref(db, `users/${currentUser}/quizzes`);
     const newQuestionRef = push(quizzesRef);
     set(newQuestionRef, newQuizItem)
-        .then(() => console.log("New question successfully added to Firebase"))
+        .then(() => {
+            console.log("New question successfully added to Firebase");
+            // No need to call loadQuizDataFromFirebase()
+        })
         .catch(error => console.error("Error adding question to Firebase:", error));
+}
+
+function updateQuestionCount() {
+    const questionCount = quizData.length;
+    const questionCountText = document.getElementById('question-count-text');
+    if (questionCountText) {
+        questionCountText.textContent = `Number of questions in your quiz: ${questionCount}`;
+    }
 }
 
 // Function to display existing questions for editing
@@ -345,7 +403,7 @@ function displayEditQuestions() {
     });
 
     document.getElementById('back-menu-btn').addEventListener('click', () => {
-        isEditingQuestions = false; // Exit edit mode
+        isEditingQuestions = false; // Reset editing mode
         displayMenu();
     });
 }
@@ -384,7 +442,7 @@ function editQuestion(key) {
 
 // Function to save question changes to Firebase under the current user
 function saveQuestionChanges(key) {
-    if (!currentUser) return; // Ensure a user is selected
+    if (!currentUser) return; // Ensure a user is signed in
     const updatedQuestion = document.getElementById('edit-question').value;
     const updatedCorrectAnswer = document.getElementById('edit-correct-answer').value;
     const updatedWrongAnswers = document.getElementById('edit-wrong-answers').value.split(',').map(answer => answer.trim());
@@ -403,11 +461,16 @@ function saveQuestionChanges(key) {
             // UI will update automatically due to onValue listener
         })
         .catch(error => console.error("Error updating question:", error));
+
+        document.getElementById('back-menu-btn').addEventListener('click', () => {
+            isEditingQuestions = false; // Reset editing mode
+            displayMenu();
+        });
 }
 
 // Function to remove a question from Firebase under the current user
 function removeQuestion(key) {
-    if (!currentUser) return; // Ensure a user is selected
+    if (!currentUser) return; // Ensure a user is signed in
     // Show the confirmation modal
     showConfirmationModal("Are you sure you want to delete this question?", () => {
         // User clicked "Yes"
@@ -624,7 +687,7 @@ function restartQuiz() {
 
 // Function to save quiz result to Firebase under the current user
 function saveQuizResult(score, totalQuestions) {
-    if (!currentUser) return; // Ensure a user is selected
+    if (!currentUser) return; // Ensure a user is signed in
     const quizLogsRef = ref(db, `users/${currentUser}/quizLogs`);
     const newLogRef = push(quizLogsRef);
     set(newLogRef, {
@@ -638,9 +701,15 @@ function saveQuizResult(score, totalQuestions) {
 
 // Function to load quiz logs from Firebase and display them in the main menu
 function loadQuizLogsFromFirebase() {
-    if (!currentUser) return; // Ensure a user is selected
+    if (!currentUser) return; // Ensure a user is signed in
     console.log("Loading quiz logs from Firebase for user:", currentUser);
-    const quizLogsRef = ref(db, `users/${currentUser}/quizLogs`);
+
+    // If a previous listener exists, remove it
+    if (quizLogsListener && quizLogsRef) {
+        off(quizLogsRef, 'value', quizLogsListener);
+    }
+
+    quizLogsRef = ref(db, `users/${currentUser}/quizLogs`);
     const logsContainer = document.getElementById('quiz-results-container');
 
     // Add a title to the quiz results container, like "Previous Games"
@@ -649,65 +718,49 @@ function loadQuizLogsFromFirebase() {
         <div id="quiz-logs"></div>
     `;
 
-    onValue(quizLogsRef, (snapshot) => {
+    quizLogsListener = onValue(quizLogsRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) {
             console.log("No quiz logs found in Firebase.");
             return;
         }
 
-        const results = Object.values(data);
+        // ... your existing code to process and display the logs ...
 
-        // Sort results by timestamp in descending order (most recent first)
-        results.sort((a, b) => b.timestamp - a.timestamp);
-
-        const quizLogs = document.getElementById('quiz-logs');
-        quizLogs.innerHTML = ''; // Clear previous logs
-
-        // Display the top 5 most recent results
-        results.slice(0, 5).forEach((result) => {
-            const percentage = Math.round((result.score / result.totalQuestions) * 100);
-            const incorrectPercentage = 100 - percentage;
-
-            // Use gradients for the progress bars
-            const correctGradient = `linear-gradient(90deg, #32CD32, #3CB371)`; // Green gradient
-            const incorrectGradient = `linear-gradient(90deg, #FF6347, #FF4500)`; // Red gradient
-
-            quizLogs.innerHTML += `
-                <div class="quiz-log">
-                    <p class="log-title"><strong>Quiz Date:</strong> ${new Date(result.timestamp).toLocaleString()}</p>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar correct" style="background: ${correctGradient}; width: ${percentage}%;"></div>
-                        <div class="progress-bar incorrect" style="background: ${incorrectGradient}; width: ${incorrectPercentage}%;"></div>
-                    </div>
-                    <p class="log-stats">
-                        <span class="correct-answer-text">${percentage}% Correct</span> 
-                        <span class="divider">|</span> 
-                        <span class="wrong-answer-text">${incorrectPercentage}% Wrong</span>
-                    </p>
-                </div>
-            `;
-        });
-    });
-}
-
-// Function to ensure the Main Menu button works appropriately
-function initializeMainMenuButton() {
-    const mainMenuBtn = document.getElementById('main-menu-btn');
-    mainMenuBtn.addEventListener('click', () => {
-        if (!currentUser) {
-            displayUserSelection();
+    }, (error) => {
+        if (error.code === 'PERMISSION_DENIED') {
+            console.warn("Permission denied when accessing quiz logs. User may have signed out.");
+            // Optionally, you can perform additional cleanup or UI updates here
         } else {
-            displayMenu();
+            console.error("Error loading quiz logs:", error);
         }
     });
 }
 
-// Call displayUserSelection when the page loads
-window.addEventListener('load', () => {
-    displayUserSelection(); // Start with user selection screen
-    initializeMainMenuButton(); // Initialize the Main Menu button
-});
 
 // Initialize the confirmation modal in your HTML
 // Make sure you have the modal structure in your HTML file
+
+document.getElementById('show-login-form').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('sign-up-container').style.display = 'none';
+    document.getElementById('login-container').style.display = 'block';
+});
+
+document.getElementById('show-sign-up-form').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('sign-up-container').style.display = 'block';
+});
+
+// Attach event listener after DOM is loaded
+window.addEventListener('DOMContentLoaded', () => {
+    // Attach event listener to the Main Menu button
+document.getElementById('main-menu-btn').addEventListener('click', () => {
+    // Reset any state variables affecting navigation
+    isEditingQuestions = false; // Reset editing mode
+    // Navigate to the main menu
+    displayMenu();
+});
+
+});
