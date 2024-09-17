@@ -11,7 +11,8 @@ let quizDataRef = null;
 let quizDataListener = null;
 let quizLogsRef = null;
 let quizLogsListener = null;
-
+let currentQuizId = null;      // Quiz ID of the currently selected quiz
+let quizNames = {};            // Object to store quiz names
 
 let currentUser = null; // Holds the UID of the currently authenticated user
 
@@ -40,6 +41,148 @@ console.log("Firebase app and database initialized");
 
 // Initialize Firebase Authentication
 const auth = getAuth(app);
+
+
+document.getElementById('logout-btn').addEventListener('click', resetApp);
+
+function resetApp() {
+    signOut(auth)
+        .then(() => {
+            console.log("User signed out");
+
+            // Hide the logout button after sign out
+            document.getElementById('logout-btn').style.display = 'none';
+
+            // The rest of the cleanup is handled in onAuthStateChanged
+        })
+        .catch((error) => {
+            console.error("Error signing out:", error);
+        });
+}
+
+
+function displayQuizSelectionMenu() {
+    console.log("Displaying quiz selection menu...");
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.style.display = 'block';
+
+    quizContainer.innerHTML = `
+        <h2>Select a Quiz</h2>
+        <button id="create-new-quiz-btn" class="styled-btn">Create New Quiz</button>
+        <div id="existing-quizzes-container"></div>
+    `;
+
+    document.getElementById('create-new-quiz-btn').addEventListener('click', displayCreateNewQuizForm);
+
+    loadExistingQuizzes();
+}
+
+
+function displayCreateNewQuizForm() {
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.innerHTML = `
+        <h2>Create New Quiz</h2>
+        <form id="create-quiz-form">
+            <label for="quiz-name">Quiz Name:</label>
+            <input type="text" id="quiz-name" required>
+            <button type="submit" class="styled-btn">Create Quiz</button>
+        </form>
+        <button id="back-to-quiz-selection-btn" class="styled-btn">Back</button>
+    `;
+
+    document.getElementById('back-to-quiz-selection-btn').addEventListener('click', displayQuizSelectionMenu);
+
+    document.getElementById('create-quiz-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        createNewQuiz();
+    });
+}
+
+function createNewQuiz() {
+    const quizName = document.getElementById('quiz-name').value;
+    const quizzesRef = ref(db, `users/${currentUser}/quizzes`);
+    const newQuizRef = push(quizzesRef);
+
+    const newQuiz = {
+        name: quizName,
+        createdAt: Date.now()
+    };
+
+    set(newQuizRef, newQuiz)
+        .then(() => {
+            console.log("New quiz created successfully");
+            currentQuizId = newQuizRef.key; // Set the current quiz ID
+            loadQuizDataFromFirebase(); // Load quiz data for the new quiz
+        })
+        .catch(error => console.error("Error creating new quiz:", error));
+}
+
+function loadExistingQuizzes() {
+    const existingQuizzesContainer = document.getElementById('existing-quizzes-container');
+    existingQuizzesContainer.innerHTML = `<p>Loading existing quizzes...</p>`;
+
+    const quizzesRef = ref(db, `users/${currentUser}/quizzes`);
+
+    onValue(quizzesRef, (snapshot) => {
+        const data = snapshot.val();
+        existingQuizzesContainer.innerHTML = ''; // Clear previous content
+        quizNames = {}; // Reset quiz names
+
+        if (data) {
+            for (let quizId in data) {
+                const quiz = data[quizId];
+                quizNames[quizId] = quiz.name; // Store the quiz name
+
+                const quizItem = document.createElement('div');
+                quizItem.className = 'quiz-item';
+                quizItem.innerHTML = `
+                    <p><strong>${quiz.name}</strong></p>
+                    <button class="styled-btn select-quiz-btn" data-quiz-id="${quizId}">Select</button>
+                    <button class="styled-btn delete-quiz-btn" data-quiz-id="${quizId}">Delete</button>
+                `;
+                existingQuizzesContainer.appendChild(quizItem);
+            }
+
+            // Attach event listeners to the select buttons
+            document.querySelectorAll('.select-quiz-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentQuizId = this.getAttribute('data-quiz-id');
+                    loadQuizDataFromFirebase(); // Load quiz data for the selected quiz
+                });
+            });
+
+            // Attach event listeners to the delete buttons
+            document.querySelectorAll('.delete-quiz-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const quizIdToDelete = this.getAttribute('data-quiz-id');
+                    deleteQuiz(quizIdToDelete);
+                });
+            });
+        } else {
+            existingQuizzesContainer.innerHTML = `<p>No quizzes found. Create a new one!</p>`;
+        }
+    }, (error) => {
+        console.error("Error loading existing quizzes:", error);
+    });
+}
+
+function deleteQuiz(quizId) {
+    // Show confirmation modal before deleting
+    showConfirmationModal("Are you sure you want to delete this quiz?", () => {
+        const quizRef = ref(db, `users/${currentUser}/quizzes/${quizId}`);
+        remove(quizRef)
+            .then(() => {
+                console.log("Quiz deleted successfully");
+                if (quizId === currentQuizId) {
+                    currentQuizId = null;
+                    quizData = [];
+                }
+                // Refresh the quiz selection menu
+                displayQuizSelectionMenu();
+            })
+            .catch(error => console.error("Error deleting quiz:", error));
+    });
+}
 
 // Function to handle user sign-up
 function handleSignUp(event) {
@@ -100,16 +243,17 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('sign-up-container').style.display = 'none';
         document.getElementById('login-container').style.display = 'none';
 
-        // Show the quiz containers and Main Menu button
-        document.getElementById('quiz-container').style.display = 'block';
-        document.getElementById('quiz-results-container').style.display = 'block';
-        document.getElementById('main-menu-btn').style.display = 'block';
+        // Show the logout button
+        document.getElementById('logout-btn').style.display = 'inline-block';
 
         // Load user data
         loadUserData();
     } else {
         // User is signed out
         console.log("User is signed out");
+
+        // Hide the logout button when the user is logged out
+        document.getElementById('logout-btn').style.display = 'none';
 
         // Remove database listeners before setting currentUser to null
         if (quizDataListener && quizDataRef) {
@@ -126,6 +270,7 @@ onAuthStateChanged(auth, (user) => {
 
         // Clear local variables
         currentUser = null;
+        currentQuizId = null; // Reset current quiz ID
         quizData = [];
         shuffledQuizData = [];
         currentQuestion = 0;
@@ -136,20 +281,19 @@ onAuthStateChanged(auth, (user) => {
         // Clear UI elements
         document.getElementById('quiz-container').innerHTML = '';
         document.getElementById('quiz-results-container').innerHTML = '';
-
-        // Hide the quiz containers and Main Menu button
         document.getElementById('quiz-container').style.display = 'none';
         document.getElementById('quiz-results-container').style.display = 'none';
-        document.getElementById('main-menu-btn').style.display = 'none';
 
-        // Show the login form and hide the sign-up form (as per your preference)
+        // Show the login form
         document.getElementById('sign-up-container').style.display = 'none';
         document.getElementById('login-container').style.display = 'block';
 
-        // Clear the password field in the login form
+        // Clear the password field
         document.getElementById('login-password').value = '';
     }
 });
+
+
 
 
 
@@ -166,21 +310,24 @@ function shuffle(array) {
 // Function to load user data
 function loadUserData() {
     console.log(`Loading data for user: ${currentUser}...`);
-    // Load user's data
-    loadQuizDataFromFirebase();
+    displayQuizSelectionMenu();
 }
+
 
 // Function to load quiz data from Firebase and display the menu after loading
 function loadQuizDataFromFirebase() {
-    if (!currentUser) return; // Ensure a user is signed in
-    console.log("Loading quiz data from Firebase for user:", currentUser);
+    if (!currentUser || !currentQuizId) {
+        console.log("No user or quiz selected. Cannot load quiz data.");
+        return; // Ensure a user and quiz are selected
+    }
+    console.log(`Loading quiz data from Firebase for user: ${currentUser}, quiz: ${currentQuizId}`);
 
     // If a previous listener exists, remove it
     if (quizDataListener && quizDataRef) {
         off(quizDataRef, 'value', quizDataListener);
     }
 
-    quizDataRef = ref(db, `users/${currentUser}/quizzes`);
+    quizDataRef = ref(db, `users/${currentUser}/quizzes/${currentQuizId}/questions`);
 
     // Use 'onValue' to listen for real-time updates
     quizDataListener = onValue(quizDataRef, (snapshot) => {
@@ -196,7 +343,7 @@ function loadQuizDataFromFirebase() {
             shuffledQuizData = shuffle([...quizData]);
             console.log("Quiz data loaded:", quizData);
         } else {
-            console.log("No quiz data found for the user.");
+            console.log("No quiz data found for the selected quiz.");
             quizData = [];
         }
         // Update the question count in the menu if necessary
@@ -204,39 +351,37 @@ function loadQuizDataFromFirebase() {
         // Call displayMenu() after data is loaded
         displayMenu();
     }, (error) => {
-        if (error.code === 'PERMISSION_DENIED') {
-            console.warn("Permission denied when accessing quiz data. User may have signed out.");
-            // Optionally, you can perform additional cleanup or UI updates here
-        } else {
-            console.error("Error loading quiz data:", error);
-        }
+        console.error("Error loading quiz data:", error);
     });
 }
 
 
+
 // Function to display the main quiz menu
 function displayMenu() {
-    if (!currentUser) {
-        console.log("No user is signed in. Cannot display menu.");
+    if (!currentUser || !currentQuizId) {
+        console.log("No user or quiz selected. Cannot display menu.");
         return;
     }
 
-    // Reset editing mode (optional redundancy)
-    isEditingQuestions = false;
+    isEditingQuestions = false; // Ensure editing mode is off
 
     console.log("Displaying menu...");
     const quizContainer = document.getElementById('quiz-container');
+    quizContainer.style.display = 'block';
+
     const questionCount = quizData.length; // Get the number of questions
+    const quizName = quizNames[currentQuizId] || "Quiz";
 
     quizContainer.innerHTML = `
-        <h2>Quiz Menu</h2>
+        <h2>${quizName} - Quiz Menu</h2>
         <p>Welcome!</p>
         <p id="question-count-text">Number of questions in your quiz: ${questionCount}</p>
         <div class="button-container">
             <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
             <button id="add-question-btn" class="styled-btn">Add Question</button>
             <button id="edit-questions-btn" class="styled-btn">Edit Existing Questions</button>
-            <button id="reset-app-btn" class="styled-btn">Log Out</button>
+            <button id="switch-quiz-btn" class="styled-btn">Switch Quiz</button>
         </div>
     `;
 
@@ -244,27 +389,19 @@ function displayMenu() {
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
     document.getElementById('edit-questions-btn').addEventListener('click', displayEditQuestions);
-    document.getElementById('reset-app-btn').addEventListener('click', resetApp);
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        currentQuizId = null;
+        quizData = [];
+        displayQuizSelectionMenu();
+    });
+    document.getElementById('logout-btn').addEventListener('click', resetApp);
+
+    // Make sure the "Main Menu" button is visible here
+    document.getElementById('main-menu-btn').style.display = 'block';
 
     // Optionally, load quiz logs
     loadQuizLogsFromFirebase();
 }
-
-
-// Function to reset the app (sign out the user)
-function resetApp() {
-    signOut(auth)
-        .then(() => {
-            console.log("User signed out");
-            // The rest of the cleanup is handled in onAuthStateChanged
-        })
-        .catch((error) => {
-            console.error("Error signing out:", error);
-        });
-}
-
-
-
 
 
 // Function to display the Add Question form
@@ -341,17 +478,18 @@ function addNewQuestion() {
 
 // Function to add a new question to Firebase under the current user
 function addNewQuestionToFirebase(newQuizItem) {
-    if (!currentUser) return; // Ensure a user is signed in
-    console.log("Adding new question to Firebase for user:", currentUser);
-    const quizzesRef = ref(db, `users/${currentUser}/quizzes`);
-    const newQuestionRef = push(quizzesRef);
+    if (!currentUser || !currentQuizId) return; // Ensure a user and quiz are selected
+    console.log(`Adding new question to Firebase for user: ${currentUser}, quiz: ${currentQuizId}`);
+    const questionsRef = ref(db, `users/${currentUser}/quizzes/${currentQuizId}/questions`);
+    const newQuestionRef = push(questionsRef);
     set(newQuestionRef, newQuizItem)
         .then(() => {
             console.log("New question successfully added to Firebase");
-            // No need to call loadQuizDataFromFirebase()
+            // No need to call loadQuizDataFromFirebase() as the listener will update
         })
         .catch(error => console.error("Error adding question to Firebase:", error));
 }
+
 
 function updateQuestionCount() {
     const questionCount = quizData.length;
@@ -425,13 +563,18 @@ function editQuestion(key) {
             <input type="text" id="edit-wrong-answers" value="${quizItem.options.filter(opt => opt !== quizItem.correct).join(', ')}" required>
 
             <div class="center-button">
-                <button type="submit" class="styled-btn">Save Changes</button>
+                <button type="submit" id="save-changes-btn" class="styled-btn">Save Changes</button>
             </div>
         </form>
         <button id="back-edit-questions-btn" class="styled-btn">Back to Edit Questions</button>
     `;
 
     document.getElementById('back-edit-questions-btn').addEventListener('click', displayEditQuestions);
+    document.getElementById('save-changes-btn').addEventListener('click', () => saveQuestionChanges(key));
+    document.getElementById('main-menu-btn').addEventListener('click', () => {
+        isEditingQuestions = false; // Reset editing mode
+        displayMenu();
+    });
 
     const form = document.getElementById('edit-question-form');
     form.addEventListener('submit', function (event) {
@@ -442,7 +585,7 @@ function editQuestion(key) {
 
 // Function to save question changes to Firebase under the current user
 function saveQuestionChanges(key) {
-    if (!currentUser) return; // Ensure a user is signed in
+    if (!currentUser || !currentQuizId) return; // Ensure a user and quiz are selected
     const updatedQuestion = document.getElementById('edit-question').value;
     const updatedCorrectAnswer = document.getElementById('edit-correct-answer').value;
     const updatedWrongAnswers = document.getElementById('edit-wrong-answers').value.split(',').map(answer => answer.trim());
@@ -453,36 +596,38 @@ function saveQuestionChanges(key) {
         options: [updatedCorrectAnswer, ...updatedWrongAnswers]
     };
 
-    // Update the question in Firebase under the current user
-    const quizDataRef = ref(db, `users/${currentUser}/quizzes/${key}`);
-    set(quizDataRef, updatedQuizItem)
+    // Update the question in Firebase under the current user and current quiz
+    const questionRef = ref(db, `users/${currentUser}/quizzes/${currentQuizId}/questions/${key}`);
+    set(questionRef, updatedQuizItem)
         .then(() => {
             console.log("Question updated successfully in Firebase");
-            // UI will update automatically due to onValue listener
+            // Navigate back to the edit questions screen
+            displayEditQuestions();
         })
         .catch(error => console.error("Error updating question:", error));
-
-        document.getElementById('back-menu-btn').addEventListener('click', () => {
-            isEditingQuestions = false; // Reset editing mode
-            displayMenu();
-        });
 }
+
 
 // Function to remove a question from Firebase under the current user
 function removeQuestion(key) {
     if (!currentUser) return; // Ensure a user is signed in
+
     // Show the confirmation modal
     showConfirmationModal("Are you sure you want to delete this question?", () => {
         // User clicked "Yes"
-        const quizDataRef = ref(db, `users/${currentUser}/quizzes/${key}`);
-        remove(quizDataRef)
+        const questionRef = ref(db, `users/${currentUser}/quizzes/${currentQuizId}/questions/${key}`);
+        remove(questionRef)
             .then(() => {
                 console.log("Question removed successfully from Firebase");
-                // The data will be reloaded automatically due to the onValue listener
+
+                // Optionally reload quiz data or stay in the current quiz menu
+                loadQuizDataFromFirebase(); // Reload data to reflect the removal
             })
             .catch(error => console.error("Error removing question:", error));
     });
 }
+
+
 
 // Function to show a confirmation modal
 function showConfirmationModal(message, onConfirm) {
