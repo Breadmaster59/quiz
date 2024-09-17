@@ -435,6 +435,27 @@ h2 {
     font-weight: bold;
 }
 
+/* Log Out Button */
+#logout-btn {
+    position: fixed;
+    top: 30px;
+    left: 250px; /* Adjust this value to control the spacing from Main Menu */
+    background-color: #000;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+    
+    /* Override styled-btn */
+    width: auto; /* Override the 100% width from .styled-btn */
+    margin: 0;   /* Remove extra margin */
+}
+
+
 /* Mobile responsiveness */
 @media (max-width: 600px) {
     /* Remove fixed positioning */
@@ -445,6 +466,19 @@ h2 {
         margin: 10px auto; /* Center the button horizontally */
         display: block; /* Ensure it takes up the full width available */
     }
+
+    /* Log Out Button */
+#logout-btn {
+    position: relative; /* Change from fixed to relative */
+        top: 0;
+        left: 0;
+        margin: 10px auto; /* Center the button horizontally */
+        display: block; /* Ensure it takes up the full width available */
+    
+    /* Override styled-btn */
+    width: auto; /* Override the 100% width from .styled-btn */
+    margin: 0;   /* Remove extra margin */
+}
 
     /* Adjust quiz container padding */
     #quiz-container {
@@ -459,8 +493,3 @@ h2 {
     }
 }
 
-#quiz-container,
-#quiz-results-container,
-#main-menu-btn {
-    display: none;
-}
