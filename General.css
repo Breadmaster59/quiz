@@ -99,14 +99,18 @@ h2 {
     cursor: pointer;
     transition: 0.3s ease;
     width: 20%;
-    max-width: 50px;
+    max-width: 60px;
     box-sizing: border-box;
     text-align: center;
     font-weight: bold;
     letter-spacing: .1rem;
     font-family: monospace;
     text-transform: uppercase;
+    border: 1px solid  #fff;
+    margin: 10px;
 }
+
+
 #main-menu-btn{
 display: none;
 }
@@ -392,14 +396,14 @@ label {
         background-color: #27ae60;
     }
 
+    .small-btn:hover,
     .styled-btn:hover,
     .choice:hover,
     #main-menu-btn:hover,
     #logout-btn:hover {
-        background: linear-gradient(to right, #A50104, #A50104);
+    background: linear-gradient(to right, #A50104, #A50104);
     transform: translateY(-3px) scale(1.02); /* Add scaling effect */
     transition: transform 0.2s ease; /* Smooth transition for scale effect */
-}
 }
 
 /* Disable Hover Effects on Touch Devices */
