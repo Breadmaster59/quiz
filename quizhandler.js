@@ -570,32 +570,52 @@ function updateQuestionCount() {
 }
 
 // Function to display existing questions for editing
+// Function to display existing questions for editing
 function displayEditQuestions() {
     isEditingQuestions = true; // Set edit mode
     console.log("Displaying existing questions for editing...");
 
     const quizContainer = document.getElementById('quiz-container');
-    let contentHTML = `<h2>Edit Existing Questions</h2>`;
-
+    
+    // Clear the content of the container to ensure it displays only the edit page
+    quizContainer.innerHTML = ''; 
+    
+    // Add the title and the back button above the table
+    let contentHTML = `
+        <h2>Edit Existing Questions</h2>
+        <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
+    `;
+    
     if (quizData.length === 0) {
         contentHTML += `<p>No questions available to edit.</p>`;
+        quizContainer.innerHTML = contentHTML;
     } else {
+        // Add the content to the container
+        quizContainer.innerHTML = contentHTML;
+
+        // Create a table for questions
+        const table = document.createElement('table');
+        table.className = 'quiz-table2 edit-questions-table'; // Add a class for the edit questions table
+        
+        // Loop through quizData to create rows for each question
         quizData.forEach((quizItem) => {
-            contentHTML += `
-                <div class="edit-question-item">
-                    <p><strong>Question:</strong> ${quizItem.question}</p>
-                    <p><strong>Options:</strong> ${quizItem.options.join(', ')}</p>
-                    <button class="styled-btn edit-btn" data-key="${quizItem.key}">Rediger</button>
-                    <button class="styled-btn remove-btn" data-key="${quizItem.key}">Delete</button>
-                </div>
+            const row = document.createElement('tr');
+            row.className = "edit-question-row"; // Add class to target rows specifically
+            row.innerHTML = `
+                <td class="question-text"><strong>${quizItem.question}</strong></td>
+                <td class="edit-buttons-cell">
+                    <button class="small-btn2 edit-btn new-edit-btn" data-key="${quizItem.key}">Rediger</button>
+                    <button class="small-btn2 remove-btn new-delete-btn" data-key="${quizItem.key}">Delete</button>
+                </td>
             `;
+            table.appendChild(row); // Append the row to the table
         });
+
+        // Append the table to the content
+        quizContainer.appendChild(table);
     }
 
-    contentHTML += `<button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>`;
-    quizContainer.innerHTML = contentHTML;
-
-    // Attach event listeners
+    // Attach event listeners to the Edit and Delete buttons
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             const key = this.getAttribute('data-key');
@@ -610,11 +630,15 @@ function displayEditQuestions() {
         });
     });
 
+    // Attach event listener to the back button
     document.getElementById('back-menu-btn').addEventListener('click', () => {
         isEditingQuestions = false; // Reset editing mode
-        displayMenu();
+        displayMenu(); // Return to the main menu
     });
 }
+
+
+
 
 // Function to edit a question
 function editQuestion(key) {

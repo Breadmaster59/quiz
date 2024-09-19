@@ -616,3 +616,36 @@ h3{
         transform: rotate(360deg);
     }
 }
+
+
+/* Target the table row but do not apply flexbox to it */
+.edit-question-row {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    text-align: left;
+}
+
+/* Target the text in the question cell */
+.edit-question-row .question-text {
+    padding-right: 10px; /* Ensure some spacing between the text and buttons */
+}
+
+/* Only apply flexbox to the button container */
+.edit-buttons-cell {
+    display: flex; /* Align buttons next to each other */
+    justify-content: flex-start; /* Align the buttons to the left of the container */
+    gap: 10px; /* Add some space between buttons */
+    padding-left: 10px; /* Add some padding to keep buttons away from the border */
+}
+
+.quiz-table2 td {
+    padding: 10px;
+    text-align: left;
+}
+
+.quiz-table2 {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    color: #EBF4F6; /* Text color */
+}
