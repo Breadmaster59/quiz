@@ -443,13 +443,17 @@ function displayAddQuestionForm() {
             <label for="wrong-answers">Wrong Answers (one per line):</label>
             <textarea id="wrong-answers" placeholder="Enter one wrong answer per line" required></textarea>
 
-
             <div class="center-button">
                 <button type="submit" class="styled-btn">Legg til:)</button>
             </div>
         </form>
         <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
         <button id="generate-options-btn" class="styled-btn">Generer 3 Feil Options fra ChatGpt</button>
+
+        <!-- Spinner will be added here dynamically -->
+        <div id="spinner-container" style="text-align:center;">
+            <div class="spinner" id="loading-spinner"></div>
+        </div>
     `;
 
     // Attach event listeners after rendering the HTML
@@ -463,30 +467,38 @@ function displayAddQuestionForm() {
 
     // Add event listener to the "Generate 3 Options" button after it's rendered
     const generateOptionsButton = document.getElementById('generate-options-btn');
-if (generateOptionsButton) {
-    generateOptionsButton.addEventListener('click', async function() {
-        const question = document.getElementById('new-question').value.trim();
-        const correctAnswer = document.getElementById('correct-answer').value.trim(); // Retrieve the correct answer
+    if (generateOptionsButton) {
+        generateOptionsButton.addEventListener('click', async function() {
+            const question = document.getElementById('new-question').value.trim();
+            const correctAnswer = document.getElementById('correct-answer').value.trim(); // Retrieve the correct answer
 
-        // Log the values to check if they're correctly retrieved
-        console.log('Question:', question);
-        console.log('Correct Answer:', correctAnswer);
+            // Log the values to check if they're correctly retrieved
+            console.log('Question:', question);
+            console.log('Correct Answer:', correctAnswer);
 
-        if (!question || !correctAnswer) {
-            alert('Please enter both a question and a correct answer!');
-            return;
-        }
+            if (!question || !correctAnswer) {
+                alert('Please enter both a question and a correct answer!');
+                return;
+            }
 
-        // Call generateWrongOptions with both the question and correct answer
-        const wrongOptions = await generateWrongOptions(question, correctAnswer);
-        if (wrongOptions && wrongOptions.length === 3) {
-            document.getElementById('wrong-answers').value = wrongOptions.join('\n');
-        } else {
-            alert('Failed to generate enough wrong options.');
-        }
-    });
+            // Show the spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+
+            // Call generateWrongOptions with both the question and correct answer
+            const wrongOptions = await generateWrongOptions(question, correctAnswer);
+
+            // Hide the spinner when the options are generated
+            document.getElementById('loading-spinner').style.display = 'none';
+
+            if (wrongOptions && wrongOptions.length === 3) {
+                document.getElementById('wrong-answers').value = wrongOptions.join('\n');
+            } else {
+                alert('Failed to generate enough wrong options.');
+            }
+        });
+    }
 }
-}
+
 
 
 // Function to add a new question to Firebase under the current user
