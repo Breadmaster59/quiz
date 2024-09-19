@@ -401,6 +401,7 @@ function displayMenu() {
         </div>
     `;
 
+    document.getElementById('quiz-results-container').style.display = 'block';
     // Attach event listeners to the menu buttons
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
@@ -713,16 +714,19 @@ function showConfirmationModal(message, onConfirm) {
 // Function to start the quiz
 function startQuiz() {
     console.log("Starting quiz...");
+
+    // Hide the previous quizzes container
+    document.getElementById('quiz-results-container').style.display = 'none';
+
     if (quizData.length === 0) {
         console.log("No questions available. Cannot start quiz.");
-        // Display a message if no questions are added
         document.getElementById('quiz-container').innerHTML = `
             <h2>No questions added yet!</h2>
             <p>Please add questions to start the quiz.</p>
             <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
         `;
         document.getElementById('back-menu-btn').addEventListener('click', displayMenu);
-        return; // Exit the function, no quiz will be loaded
+        return;
     }
 
     shuffledQuizData = shuffle([...quizData]);
@@ -741,6 +745,7 @@ function startQuiz() {
     `;
     loadQuiz();
 }
+
 
 // Function to load the quiz question
 function loadQuiz() {
