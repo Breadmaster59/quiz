@@ -130,19 +130,25 @@ function loadExistingQuizzes() {
         quizNames = {}; // Reset quiz names
 
         if (data) {
+            const table = document.createElement('table');
+            table.className = 'quiz-table'; // Add a class for styling
+
             for (let quizId in data) {
                 const quiz = data[quizId];
                 quizNames[quizId] = quiz.name; // Store the quiz name
 
-                const quizItem = document.createElement('div');
-                quizItem.className = 'quiz-item';
-                quizItem.innerHTML = `
-                    <p><strong>${quiz.name}</strong></p>
-                    <button class="styled-btn select-quiz-btn" data-quiz-id="${quizId}">Select</button>
-                    <button class="styled-btn delete-quiz-btn" data-quiz-id="${quizId}">Delete</button>
+                const row = document.createElement('tr'); // Create a new row
+                row.innerHTML = `
+                    <td><strong>${quiz.name}</strong></td>
+                    <td>
+                        <button class="small-btn2 select-quiz-btn" data-quiz-id="${quizId}">Select</button>
+                        <button class="small-btn2 delete-quiz-btn" data-quiz-id="${quizId}">Delete</button>
+                    </td>
                 `;
-                existingQuizzesContainer.appendChild(quizItem);
+                table.appendChild(row); // Append the row to the table
             }
+
+            existingQuizzesContainer.appendChild(table);
 
             // Attach event listeners to the select buttons
             document.querySelectorAll('.select-quiz-btn').forEach(btn => {
@@ -166,6 +172,7 @@ function loadExistingQuizzes() {
         console.error("Error loading existing quizzes:", error);
     });
 }
+
 
 function deleteQuiz(quizId) {
     // Show confirmation modal before deleting
@@ -928,16 +935,18 @@ function loadQuizLogsFromFirebase() {
             return;
         }
 
+        const logEntries = Object.entries(data);
+        const sortedLogs = logEntries.sort((a, b) => b[1].timestamp - a[1].timestamp); // Sort by latest first
+
+        // Display only the latest 10 logs
+        const latestLogs = sortedLogs.slice(0, 10);
+
         quizLogsDiv.innerHTML = ''; // Clear existing logs
 
-        Object.keys(data).forEach(logId => {
-            const log = data[logId];
-            
-            // Create the log element and apply CSS class
+        latestLogs.forEach(([logId, log]) => {
             const logElement = document.createElement('div');
-            logElement.classList.add('quiz-log'); // Apply your CSS class here
+            logElement.classList.add('quiz-log');
             
-            // Apply inner content and correct styles
             logElement.innerHTML = `
                 <p>Date: ${new Date(log.timestamp).toLocaleString()}</p>
                 <p>Score: ${log.score} / ${log.totalQuestions}</p>
@@ -950,9 +959,22 @@ function loadQuizLogsFromFirebase() {
                     </div>
                 </div>
             `;
-            
             quizLogsDiv.appendChild(logElement);
         });
+
+        // If more than 10 logs exist, delete the oldest ones
+        if (sortedLogs.length > 10) {
+            const logsToDelete = sortedLogs.slice(10); // Get logs older than the 10 most recent
+
+            logsToDelete.forEach(([logId]) => {
+                const logRef = ref(db, `users/${currentUser}/quizLogs/${logId}`);
+                remove(logRef).then(() => {
+                    console.log(`Deleted old log: ${logId}`);
+                }).catch((error) => {
+                    console.error(`Error deleting old log: ${logId}`, error);
+                });
+            });
+        }
     }, (error) => {
         if (error.code === 'PERMISSION_DENIED') {
             console.warn("Permission denied when accessing quiz logs. User may have signed out.");
@@ -961,6 +983,7 @@ function loadQuizLogsFromFirebase() {
         }
     });
 }
+
 
 
 // Initialize the confirmation modal in your HTML

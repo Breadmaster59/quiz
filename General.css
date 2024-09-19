@@ -5,7 +5,7 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(to right, #0b0118, #070122);
+    background: linear-gradient(to right, #0b0118, #010613, #0b0118);
     margin: 0;
     padding: 0;
     width: 100%;
@@ -14,8 +14,8 @@ body {
 /* Container Styles */
 #quiz-container,
 #quiz-results-container {
-    background: linear-gradient(#f5f5f5ee, #fcfcfcee);
-    box-shadow: 0 4px 15px #00000054;
+    background-color: #010613;
+    box-shadow: 0 4px 15px #000000;
     border-radius: 10px;
     margin: 20px auto;
     max-width: 600px;
@@ -28,13 +28,14 @@ body {
     font-weight: lighter;
     text-transform: uppercase;
     font-size: 1rem;
+    color: #EBF4F6;
 }
 
 
 /* Text Styles */
 h2 {
     font-size: 2rem;
-    color: #010613;
+    color: #EBF4F6;
     margin-bottom: 20px;
     text-align: center;
     letter-spacing: .1rem;
@@ -65,10 +66,10 @@ h2 {
 .choice,
 #main-menu-btn,
 #logout-btn {
-    background: linear-gradient(to right, #010613, #010613);
+    background-color: #EBF4F6;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.329);
     border-radius: 10px;
-    color: #fff;
+    color: #010613;
     padding: 12px;
     font-size: 1rem;
     border: none;
@@ -115,13 +116,13 @@ display: none;
 }
 
 .choice {
-    background-color: #3498db;
+    background-color: #fff;
     max-width: 300px;
 }
 
 #main-menu-btn,
 #logout-btn {
-    background-color: #000;
+    background-color: #fff;
     margin: 0 auto; /* Center the button */
     width: auto;
     max-width: none;
@@ -129,7 +130,7 @@ display: none;
 
 
 .choice:hover {
-    background-color: #2980b9;
+    background-color: #fff;
     transform: translateY(-3px);
 }
 
@@ -197,7 +198,7 @@ label {
 }
 
 h3{
-    color: #010613;
+    color: #EBF4F6;
 }
 
 /* Center paragraphs inside the login container */
@@ -219,6 +220,7 @@ h3{
     text-align: left;
     transition: transform 0.3s ease;
     color: #EFECCA;
+    border: 1px solid #EFECCA;
 }
 
 .review-item:hover {
@@ -403,15 +405,16 @@ h3{
 .button-container {
     grid-template-columns: repeat(2, 1fr);
 }
-
+    .small-btn2:hover,
     .small-btn:hover,
     .styled-btn:hover,
     .choice:hover,
     #main-menu-btn:hover,
     #logout-btn:hover {
-    background: linear-gradient(to right, #A50104, #A50104);
+    background: linear-gradient(to right, #47089b, #0116ff);
     transform: translateY(-3px) scale(1.02); /* Add scaling effect */
     transition: transform 0.2s ease; /* Smooth transition for scale effect */
+    color: white;
 }
 
 /* Disable Hover Effects on Touch Devices */
@@ -484,4 +487,110 @@ h3{
 
 .ledende-tekst{
     color: white;
+}
+
+
+/* Quiz Selection List */
+.quiz-list-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 10px;
+    text-align: left;
+    font-family: monospace;
+    font-weight: lighter;
+    text-transform: uppercase;
+    font-size: 1rem;
+    color: #EBF4F6;
+}
+
+.quiz-list-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    background-color: #010613;
+    border: 1px solid #EBF4F6;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.329);
+}
+
+.quiz-list-item p {
+    margin: 0;
+    color: #EBF4F6;
+}
+
+.small-btn {
+    background: linear-gradient(to right, #010613, #010613);
+    color: #fff;
+    padding: 8px;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    width: 100px;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: .1rem;
+    font-family: monospace;
+    text-transform: uppercase;
+    border: 1px solid #fff;
+    margin-left: 5px;
+}
+
+.small-btn:hover {
+    background-color: #370d6e;
+    transform: translateY(-2px);
+}
+
+/* Make the container smaller */
+.quiz-list-container {
+    max-width: 500px;
+}
+
+@media (max-width: 600px) {
+    .quiz-list-item {
+        grid-template-columns: 1fr auto;
+    }
+
+    .small-btn {
+        width: 90px;
+        padding: 6px;
+    }
+}
+
+/* Table Styles for Quizzes */
+.quiz-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    color: #EBF4F6; /* Text color */
+}
+
+.quiz-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Smaller Button Styles */
+.small-btn2 {
+    padding: 8px;
+    font-size: 0.8rem;
+    max-width: 100px;
+    width: auto;
+    border: 2px solid #E0ECBE;
+    font-family: monospace;
+}
+
+/* Adjusting the button container for smaller buttons */
+#existing-quizzes-container .small-btn {
+    margin: 5px;
+    padding: 5px 10px;
 }
