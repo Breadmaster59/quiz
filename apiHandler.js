@@ -1,15 +1,4 @@
-document.getElementById('camera-btn').addEventListener('click', async () => {
-    try {
-        const imageFile = await captureImage();
-        const base64Image = await convertImageToBase64(imageFile);
-        
-        // Send to Firebase Function
-        const detectedText = await analyzeImage(base64Image);
-        console.log('Detected Text:', detectedText);
-    } catch (error) {
-        console.error('Error capturing or processing the image:', error);
-    }
-});
+
 
 // Function to send the base64 image to Firebase Function for analysis
 async function analyzeImage(base64Image) {

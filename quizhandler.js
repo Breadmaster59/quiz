@@ -405,11 +405,12 @@ function displayMenu() {
             <button id="add-question-btn" class="styled-btn">Legg til spørsmål</button>
             <button id="edit-questions-btn" class="styled-btn">Rediger Spørsmål</button>
             <button id="switch-quiz-btn" class="styled-btn">Bytt Quiz</button>
-            <button id="camera-btn">Capture Image</button>
+            <button id="camera-btn" class="styled-btn">Capture Image</button>
         </div>
     `;
 
     document.getElementById('quiz-results-container').style.display = 'block';
+    
     // Attach event listeners to the menu buttons
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
@@ -422,9 +423,29 @@ function displayMenu() {
     // Ensure the "Main Menu" button is visible here
     document.getElementById('main-menu-btn').style.display = 'block';
 
+    // Add event listener for the camera button (for image capture)
+    const cameraButton = document.getElementById('camera-btn');
+    if (cameraButton) {
+        cameraButton.addEventListener('click', async () => {
+            try {
+                const imageFile = await captureImage();
+                const base64Image = await convertImageToBase64(imageFile);
+                
+                // Send to Firebase Function
+                const detectedText = await analyzeImage(base64Image);
+                console.log('Detected Text:', detectedText);
+            } catch (error) {
+                console.error('Error capturing or processing the image:', error);
+            }
+        });
+    } else {
+        console.error('Camera button not found.');
+    }
+
     // Optionally, load quiz logs
     loadQuizLogsFromFirebase();
 }
+
 
 
 
