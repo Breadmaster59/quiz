@@ -405,6 +405,7 @@ function displayMenu() {
             <button id="add-question-btn" class="styled-btn">Legg til spørsmål</button>
             <button id="edit-questions-btn" class="styled-btn">Rediger Spørsmål</button>
             <button id="switch-quiz-btn" class="styled-btn">Bytt Quiz</button>
+            <button id="camera-btn">Capture Image</button>
         </div>
     `;
 
@@ -1076,7 +1077,8 @@ async function generateWrongOptions(question, correctAnswer) {
     }
 
     // Create the prompt for the OpenAI API
-    const prompt = `You're helping to create a multiple-choice quiz question. Given the question and the correct answer, generate three plausible but incorrect options.
+    const prompt = `You're helping to create a multiple-choice quiz question. 
+    Given the question and the correct answer, generate three plausible and similar but incorrect options that seem factual correct.
 
 Question: ${question}
 Correct Answer: ${correctAnswer}
