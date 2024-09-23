@@ -56,9 +56,11 @@ body {
 /* Centering when the quiz starts */
 .quiz-centered {
     position: fixed;
+    top: 10%;
+    transform: translateY(10%); /* Only translate vertically */
     width: 90%;
     max-width: 600px; /* Adjust as needed */
-    padding: 100px;
+    padding: 20px;
     box-sizing: border-box;
     z-index: 100;
     overflow-y: auto; /* Scroll if content exceeds viewport height */
@@ -478,7 +480,7 @@ h3{
         margin: 10px auto;
         padding: 15px;
     }
-}
+
     /* Adjust Containers */
     #quiz-container,
     #quiz-results-container {
