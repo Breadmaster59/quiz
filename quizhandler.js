@@ -388,6 +388,9 @@ function displayMenu() {
     const quizContainer = document.getElementById('quiz-container');
     quizContainer.style.display = 'block';
 
+    // Reset quiz container position
+    quizContainer.classList.remove('quiz-centered');
+
     const questionCount = quizData.length; // Get the number of questions
     const quizName = quizNames[currentQuizId] || "Quiz";
 
@@ -408,7 +411,7 @@ function displayMenu() {
     `;
 
     document.getElementById('quiz-results-container').style.display = 'block';
-    
+
     // Attach event listeners to the menu buttons
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
@@ -443,6 +446,7 @@ function displayMenu() {
     // Optionally, load quiz logs
     loadQuizLogsFromFirebase();
 }
+
 
 
 
@@ -781,9 +785,13 @@ function startQuiz() {
     // Hide the previous quizzes container
     document.getElementById('quiz-results-container').style.display = 'none';
 
+    // Center the quiz container
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.classList.add('quiz-centered');
+
     if (quizData.length === 0) {
         console.log("No questions available. Cannot start quiz.");
-        document.getElementById('quiz-container').innerHTML = `
+        quizContainer.innerHTML = `
             <h2>No questions added yet!</h2>
             <p>Please add questions to start the quiz.</p>
             <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
@@ -796,7 +804,7 @@ function startQuiz() {
     currentQuestion = 0;
     correctAnswers = 0;
     wrongAnswers = [];
-    document.getElementById('quiz-container').innerHTML = `
+    quizContainer.innerHTML = `
         <div id="question">Question will go here</div>
         <div id="choices">
             <button class="choice">Option 1</button>
@@ -808,6 +816,7 @@ function startQuiz() {
     `;
     loadQuiz();
 }
+
 
 // Function to load the quiz question
 function loadQuiz() {
@@ -1096,7 +1105,7 @@ async function generateWrongOptions(question, correctAnswer) {
     // Create the prompt for the OpenAI API
     const prompt = `"You're helping to create a multiple-choice quiz question. 
     Given the question and the correct answer, generate three plausible and similar but incorrect options that are 
-    grammatically and structurally similar to the correct answer. The incorrect options should be difficult to distinguish the right answer.
+    grammatically and structurally similar to the correct answer. The incorrect options should be difficult to distinguish the right answe
     
 
 Question: ${question}

@@ -12,7 +12,6 @@ body {
 }
 
 /* Container Styles */
-#quiz-container,
 #quiz-results-container {
     background-color: #010613;
     box-shadow: 0 4px 15px #000000;
@@ -30,6 +29,42 @@ body {
     font-size: 1rem;
     color: #EBF4F6;
 }
+
+/* General Container Styles */
+#quiz-container {
+    background-color: #010613;
+    box-shadow: 0 4px 15px #000000;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 800px;
+    width: 90%;
+    padding: 20px;
+    text-align: center;
+    overflow-y: auto;
+    letter-spacing: .1rem;
+    font-family: monospace;
+    font-weight: lighter;
+    text-transform: uppercase;
+    font-size: 1rem;
+    color: #EBF4F6;
+    transition: transform 0.3s ease, top 0.3s ease; /* Smooth transition */
+    position: relative; /* Allows dynamic positioning */
+}
+
+/* Centering when the quiz starts */
+/* Centering when the quiz starts */
+/* Centering when the quiz starts */
+.quiz-centered {
+    position: fixed;
+    width: 90%;
+    max-width: 600px; /* Adjust as needed */
+    padding: 100px;
+    box-sizing: border-box;
+    z-index: 100;
+    overflow-y: auto; /* Scroll if content exceeds viewport height */
+}
+
+
 
 
 /* Text Styles */
@@ -259,6 +294,7 @@ h3{
     flex-direction: row;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap; /* Allows items to wrap to the next line */
 }
 
 /* Progress Bar Styles */
@@ -434,6 +470,15 @@ h3{
 /* Mobile Responsiveness */
 @media (max-width: 600px) {
 
+    .quiz-centered {
+        position: static; /* Reset position to default */
+        transform: none;  /* No transformation */
+        width: 90%;
+        max-width: 500px; /* Use the mobile-specific width */
+        margin: 10px auto;
+        padding: 15px;
+    }
+}
     /* Adjust Containers */
     #quiz-container,
     #quiz-results-container {
@@ -443,6 +488,7 @@ h3{
         padding: 15px;
     }
 
+    
     /* Adjust Buttons */
     .styled-btn,
     .choice {
