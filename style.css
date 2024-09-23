@@ -27,7 +27,7 @@ body {
 #question-counter {
     font-size: 1rem;
     font-weight: bold;
-    color: #333;
+    color: #2ecc71;
     margin-top: 10px;
     text-align: left;
 }
@@ -135,7 +135,7 @@ body {
 .review-question {
     font-size: 1.2rem;
     margin-bottom: 10px;
-    color: #333;
+    color: #dadada;
 }
 
 .wrong-answer {
@@ -210,7 +210,7 @@ input[type="text"] {
 #logout-btn {
     position: fixed;
     top: 20px;
-    left: 150px; /* Adjust this value based on how far you want the Log Out button from the Main Menu button */
+    left: 200px; /* Adjust this value based on how far you want the Log Out button from the Main Menu button */
     background-color: #000;
     color: white;
     padding: 10px 20px;
@@ -265,54 +265,3 @@ input[type="text"] {
     }
 }
 
-/* Quiz logs container styling */
-#quiz-logs-container {
-    margin-top: 30px;
-}
-
-#quiz-logs {
-    margin-top: 15px;
-}
-
-.quiz-log {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.quiz-log p {
-    margin: 0 0 5px 0;
-    font-size: 1rem;
-}
-
-.progress-bar-wrapper {
-    display: flex;
-    width: 100%;
-    height: 25px;
-    border-radius: 5px;
-    overflow: hidden;
-    position: relative;
-}
-
-.progress-bar {
-    height: 100%;
-    text-align: center;
-    font-size: 14px;
-    line-height: 25px;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.correct {
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-}
-
-.incorrect {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-}

@@ -24,7 +24,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 
 // Firebase config and initialization
 const firebaseConfig = {
-    apiKey: "AIzaSyAfG-L_fgyuOpYV3__RZrRM3pliaUA4xh8",
+    apiKey: "AIzaSyAfG-L_fgyuOpYV3__RZrRM3pliaUA4xh8",  // Add this line
     authDomain: "quizquestionstorage.firebaseapp.com",
     projectId: "quizquestionstorage",
     storageBucket: "quizquestionstorage.appspot.com",
@@ -68,7 +68,7 @@ function displayQuizSelectionMenu() {
 
     quizContainer.innerHTML = `
         <h2>Select a Quiz</h2>
-        <button id="create-new-quiz-btn" class="styled-btn">Create New Quiz</button>
+        <button id="create-new-quiz-btn" class="styled-btn">QUIZ+</button>
         <div id="existing-quizzes-container"></div>
     `;
 
@@ -87,7 +87,7 @@ function displayCreateNewQuizForm() {
             <input type="text" id="quiz-name" required>
             <button type="submit" class="styled-btn">Create Quiz</button>
         </form>
-        <button id="back-to-quiz-selection-btn" class="styled-btn">Back</button>
+        <button id="back-to-quiz-selection-btn" class="styled-btn">Tilbake</button>
     `;
 
     document.getElementById('back-to-quiz-selection-btn').addEventListener('click', displayQuizSelectionMenu);
@@ -129,19 +129,25 @@ function loadExistingQuizzes() {
         quizNames = {}; // Reset quiz names
 
         if (data) {
+            const table = document.createElement('table');
+            table.className = 'quiz-table'; // Add a class for styling
+
             for (let quizId in data) {
                 const quiz = data[quizId];
                 quizNames[quizId] = quiz.name; // Store the quiz name
 
-                const quizItem = document.createElement('div');
-                quizItem.className = 'quiz-item';
-                quizItem.innerHTML = `
-                    <p><strong>${quiz.name}</strong></p>
-                    <button class="styled-btn select-quiz-btn" data-quiz-id="${quizId}">Select</button>
-                    <button class="styled-btn delete-quiz-btn" data-quiz-id="${quizId}">Delete</button>
+                const row = document.createElement('tr'); // Create a new row
+                row.innerHTML = `
+                    <td><strong>${quiz.name}</strong></td>
+                    <td>
+                        <button class="small-btn2 select-quiz-btn" data-quiz-id="${quizId}">Select</button>
+                        <button class="small-btn2 delete-quiz-btn" data-quiz-id="${quizId}">Delete</button>
+                    </td>
                 `;
-                existingQuizzesContainer.appendChild(quizItem);
+                table.appendChild(row); // Append the row to the table
             }
+
+            existingQuizzesContainer.appendChild(table);
 
             // Attach event listeners to the select buttons
             document.querySelectorAll('.select-quiz-btn').forEach(btn => {
@@ -355,7 +361,19 @@ function loadQuizDataFromFirebase() {
     });
 }
 
+// Function to toggle the visibility of the motivation text
+function toggleMotivationText() {
+    const motivationText = document.getElementById('motivation-text');
+    const toggleButton = document.getElementById('toggle-motivation-btn');
 
+    if (motivationText.style.display === 'none') {
+        motivationText.style.display = 'inline';
+        toggleButton.textContent = 'Skjul';
+    } else {
+        motivationText.style.display = 'none';
+        toggleButton.textContent = 'Vis';
+    }
+}
 
 // Function to display the main quiz menu
 function displayMenu() {
@@ -375,36 +393,61 @@ function displayMenu() {
 
     quizContainer.innerHTML = `
         <h2>${quizName} - Quiz Menu</h2>
-        <p>Welcome!</p>
-        <p id="question-count-text">Number of questions in your quiz: ${questionCount}</p>
+        <div id="motivation-container" style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+            <p id="motivation-text" style="font-size: 0.9rem; margin-right: 1px;">Du er flink som jobber med skole:)</p>
+            <button id="toggle-motivation-btn" class="small-btn">Skjul</button>
+        </div>
+        <p id="question-count-text">Antall spørsmål i quizzen: ${questionCount}</p>
         <div class="button-container">
             <button id="start-quiz-btn" class="styled-btn">Start Quiz</button>
-            <button id="add-question-btn" class="styled-btn">Add Question</button>
-            <button id="edit-questions-btn" class="styled-btn">Edit Existing Questions</button>
-            <button id="switch-quiz-btn" class="styled-btn">Switch Quiz</button>
+            <button id="add-question-btn" class="styled-btn">Legg til spørsmål</button>
+            <button id="edit-questions-btn" class="styled-btn">Rediger Spørsmål</button>
+            <button id="switch-quiz-btn" class="styled-btn">Bytt Quiz</button>
+            <button id="camera-btn" class="styled-btn">Capture Image</button>
         </div>
     `;
 
+    document.getElementById('quiz-results-container').style.display = 'block';
+    
     // Attach event listeners to the menu buttons
     document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
     document.getElementById('add-question-btn').addEventListener('click', displayAddQuestionForm);
     document.getElementById('edit-questions-btn').addEventListener('click', displayEditQuestions);
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        currentQuizId = null;
-        quizData = [];
-        displayQuizSelectionMenu();
-    });
-    document.getElementById('logout-btn').addEventListener('click', resetApp);
+    document.getElementById('switch-quiz-btn').addEventListener('click', displayQuizSelectionMenu);
 
-    // Make sure the "Main Menu" button is visible here
+    // Event listener for the toggle button
+    document.getElementById('toggle-motivation-btn').addEventListener('click', toggleMotivationText);
+
+    // Ensure the "Main Menu" button is visible here
     document.getElementById('main-menu-btn').style.display = 'block';
+
+    // Add event listener for the camera button (for image capture)
+    const cameraButton = document.getElementById('camera-btn');
+    if (cameraButton) {
+        cameraButton.addEventListener('click', async () => {
+            try {
+                const imageFile = await captureImage();
+                const base64Image = await convertImageToBase64(imageFile);
+                
+                // Send to Firebase Function
+                const detectedText = await analyzeImage(base64Image);
+                console.log('Detected Text:', detectedText);
+            } catch (error) {
+                console.error('Error capturing or processing the image:', error);
+            }
+        });
+    } else {
+        console.error('Camera button not found.');
+    }
 
     // Optionally, load quiz logs
     loadQuizLogsFromFirebase();
 }
 
 
-// Function to display the Add Question form
+
+
+
 function displayAddQuestionForm() {
     console.log("Displaying Add Question form...");
     const quizContainer = document.getElementById('quiz-container');
@@ -417,16 +460,23 @@ function displayAddQuestionForm() {
             <label for="correct-answer">Correct Answer:</label>
             <input type="text" id="correct-answer" placeholder="Enter the correct answer" required>
 
-            <label for="wrong-answers">Wrong Answers (separated by commas):</label>
-            <input type="text" id="wrong-answers" placeholder="Option 1, Option 2, Option 3" required>
+            <label for="wrong-answers">Wrong Answers (one per line):</label>
+            <textarea id="wrong-answers" placeholder="Enter one wrong answer per line" required></textarea>
 
             <div class="center-button">
-                <button type="submit" class="styled-btn">Add Question</button>
+                <button type="submit" class="styled-btn">Legg til:)</button>
             </div>
         </form>
-        <button id="back-menu-btn" class="styled-btn">Back to Menu</button>
+        <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
+        <button id="generate-options-btn" class="styled-btn">Generer 3 Feil Options fra ChatGpt</button>
+
+        <!-- Spinner will be added here dynamically -->
+        <div id="spinner-container" style="text-align:center;">
+            <div class="spinner" id="loading-spinner"></div>
+        </div>
     `;
 
+    // Attach event listeners after rendering the HTML
     document.getElementById('back-menu-btn').addEventListener('click', displayMenu);
 
     const form = document.getElementById('add-question-form');
@@ -434,7 +484,42 @@ function displayAddQuestionForm() {
         event.preventDefault();
         addNewQuestion();
     });
+
+    // Add event listener to the "Generate 3 Options" button after it's rendered
+    const generateOptionsButton = document.getElementById('generate-options-btn');
+    if (generateOptionsButton) {
+        generateOptionsButton.addEventListener('click', async function() {
+            const question = document.getElementById('new-question').value.trim();
+            const correctAnswer = document.getElementById('correct-answer').value.trim(); // Retrieve the correct answer
+
+            // Log the values to check if they're correctly retrieved
+            console.log('Question:', question);
+            console.log('Correct Answer:', correctAnswer);
+
+            if (!question || !correctAnswer) {
+                alert('Please enter both a question and a correct answer!');
+                return;
+            }
+
+            // Show the spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+
+            // Call generateWrongOptions with both the question and correct answer
+            const wrongOptions = await generateWrongOptions(question, correctAnswer);
+
+            // Hide the spinner when the options are generated
+            document.getElementById('loading-spinner').style.display = 'none';
+
+            if (wrongOptions && wrongOptions.length === 3) {
+                document.getElementById('wrong-answers').value = wrongOptions.join('\n');
+            } else {
+                alert('Failed to generate enough wrong options.');
+            }
+        });
+    }
 }
+
+
 
 // Function to add a new question to Firebase under the current user
 function addNewQuestion() {
@@ -443,13 +528,18 @@ function addNewQuestion() {
     const correctAnswer = document.getElementById('correct-answer').value;
     const wrongAnswersInput = document.getElementById('wrong-answers').value;
 
-    const wrongAnswersArray = wrongAnswersInput.split(',').map(answer => answer.trim());
+    const wrongAnswersArray = wrongAnswersInput
+    .split('\n')
+    .map(answer => answer.trim())
+    .filter(answer => answer.length > 0);
+
 
     if (wrongAnswersArray.length === 3) {
         const newQuizItem = {
             question: newQuestion,
             correct: correctAnswer,
             options: [correctAnswer, ...wrongAnswersArray]
+        
         };
 
         // Add the new question to Firebase under the current user
@@ -500,32 +590,52 @@ function updateQuestionCount() {
 }
 
 // Function to display existing questions for editing
+// Function to display existing questions for editing
 function displayEditQuestions() {
     isEditingQuestions = true; // Set edit mode
     console.log("Displaying existing questions for editing...");
 
     const quizContainer = document.getElementById('quiz-container');
-    let contentHTML = `<h2>Edit Existing Questions</h2>`;
-
+    
+    // Clear the content of the container to ensure it displays only the edit page
+    quizContainer.innerHTML = ''; 
+    
+    // Add the title and the back button above the table
+    let contentHTML = `
+        <h2>Edit Existing Questions</h2>
+        <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
+    `;
+    
     if (quizData.length === 0) {
         contentHTML += `<p>No questions available to edit.</p>`;
+        quizContainer.innerHTML = contentHTML;
     } else {
+        // Add the content to the container
+        quizContainer.innerHTML = contentHTML;
+
+        // Create a table for questions
+        const table = document.createElement('table');
+        table.className = 'quiz-table2 edit-questions-table'; // Add a class for the edit questions table
+        
+        // Loop through quizData to create rows for each question
         quizData.forEach((quizItem) => {
-            contentHTML += `
-                <div class="edit-question-item">
-                    <p><strong>Question:</strong> ${quizItem.question}</p>
-                    <p><strong>Options:</strong> ${quizItem.options.join(', ')}</p>
-                    <button class="styled-btn edit-btn" data-key="${quizItem.key}">Edit</button>
-                    <button class="styled-btn remove-btn" data-key="${quizItem.key}">Remove</button>
-                </div>
+            const row = document.createElement('tr');
+            row.className = "edit-question-row"; // Add class to target rows specifically
+            row.innerHTML = `
+                <td class="question-text"><strong>${quizItem.question}</strong></td>
+                <td class="edit-buttons-cell">
+                    <button class="small-btn2 edit-btn new-edit-btn" data-key="${quizItem.key}">Rediger</button>
+                    <button class="small-btn2 remove-btn new-delete-btn" data-key="${quizItem.key}">Delete</button>
+                </td>
             `;
+            table.appendChild(row); // Append the row to the table
         });
+
+        // Append the table to the content
+        quizContainer.appendChild(table);
     }
 
-    contentHTML += `<button id="back-menu-btn" class="styled-btn">Back to Menu</button>`;
-    quizContainer.innerHTML = contentHTML;
-
-    // Attach event listeners
+    // Attach event listeners to the Edit and Delete buttons
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             const key = this.getAttribute('data-key');
@@ -540,11 +650,15 @@ function displayEditQuestions() {
         });
     });
 
+    // Attach event listener to the back button
     document.getElementById('back-menu-btn').addEventListener('click', () => {
         isEditingQuestions = false; // Reset editing mode
-        displayMenu();
+        displayMenu(); // Return to the main menu
     });
 }
+
+
+
 
 // Function to edit a question
 function editQuestion(key) {
@@ -566,7 +680,7 @@ function editQuestion(key) {
                 <button type="submit" id="save-changes-btn" class="styled-btn">Save Changes</button>
             </div>
         </form>
-        <button id="back-edit-questions-btn" class="styled-btn">Back to Edit Questions</button>
+        <button id="back-edit-questions-btn" class="styled-btn">Tilbake til redigering</button>
     `;
 
     document.getElementById('back-edit-questions-btn').addEventListener('click', displayEditQuestions);
@@ -663,16 +777,19 @@ function showConfirmationModal(message, onConfirm) {
 // Function to start the quiz
 function startQuiz() {
     console.log("Starting quiz...");
+
+    // Hide the previous quizzes container
+    document.getElementById('quiz-results-container').style.display = 'none';
+
     if (quizData.length === 0) {
         console.log("No questions available. Cannot start quiz.");
-        // Display a message if no questions are added
         document.getElementById('quiz-container').innerHTML = `
             <h2>No questions added yet!</h2>
             <p>Please add questions to start the quiz.</p>
-            <button id="back-menu-btn" class="styled-btn">Back to Menu</button>
+            <button id="back-menu-btn" class="styled-btn">Tilbake til Meny</button>
         `;
         document.getElementById('back-menu-btn').addEventListener('click', displayMenu);
-        return; // Exit the function, no quiz will be loaded
+        return;
     }
 
     shuffledQuizData = shuffle([...quizData]);
@@ -765,7 +882,7 @@ function checkAnswer(selectedButton, correctAnswer, currentQuiz) {
 
     // Show "Next" button after the question is answered
     document.getElementById('next-btn-container').innerHTML = `
-        <button id="next-btn" class="styled-btn">Next</button>
+        <button id="next-btn" class="styled-btn">Neste</button>
     `;
 
     document.getElementById('next-btn').addEventListener('click', () => {
@@ -863,19 +980,59 @@ function loadQuizLogsFromFirebase() {
         <div id="quiz-logs"></div>
     `;
 
+    const quizLogsDiv = document.getElementById('quiz-logs'); // This div will contain the logs
+
     quizLogsListener = onValue(quizLogsRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) {
             console.log("No quiz logs found in Firebase.");
+            quizLogsDiv.innerHTML = `<p>No previous games found.</p>`;
             return;
         }
 
-        // ... your existing code to process and display the logs ...
+        const logEntries = Object.entries(data);
+        const sortedLogs = logEntries.sort((a, b) => b[1].timestamp - a[1].timestamp); // Sort by latest first
 
+        // Display only the latest 10 logs
+        const latestLogs = sortedLogs.slice(0, 10);
+
+        quizLogsDiv.innerHTML = ''; // Clear existing logs
+
+        latestLogs.forEach(([logId, log]) => {
+            const logElement = document.createElement('div');
+            logElement.classList.add('quiz-log');
+            
+            logElement.innerHTML = `
+                <p>Date: ${new Date(log.timestamp).toLocaleString()}</p>
+                <p>Score: ${log.score} / ${log.totalQuestions}</p>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar correct" style="width: ${(log.score / log.totalQuestions) * 100}%;">
+                        ${Math.round((log.score / log.totalQuestions) * 100)}%
+                    </div>
+                    <div class="progress-bar incorrect" style="width: ${(1 - log.score / log.totalQuestions) * 100}%;">
+                        ${Math.round((1 - log.score / log.totalQuestions) * 100)}%
+                    </div>
+                </div>
+            `;
+            quizLogsDiv.appendChild(logElement);
+        });
+
+        // If more than 10 logs exist, delete the oldest ones
+        if (sortedLogs.length > 10) {
+            const logsToDelete = sortedLogs.slice(10); // Get logs older than the 10 most recent
+
+            logsToDelete.forEach(([logId]) => {
+                const logRef = ref(db, `users/${currentUser}/quizLogs/${logId}`);
+                remove(logRef).then(() => {
+                    console.log(`Deleted old log: ${logId}`);
+                }).catch((error) => {
+                    console.error(`Error deleting old log: ${logId}`, error);
+                });
+            });
+        }
     }, (error) => {
         if (error.code === 'PERMISSION_DENIED') {
             console.warn("Permission denied when accessing quiz logs. User may have signed out.");
-            // Optionally, you can perform additional cleanup or UI updates here
         } else {
             console.error("Error loading quiz logs:", error);
         }
@@ -908,4 +1065,95 @@ document.getElementById('main-menu-btn').addEventListener('click', () => {
     displayMenu();
 });
 
+});
+
+async function generateWrongOptions(question, correctAnswer) {
+    // Function to make the API call
+    async function callFirebaseFunction(prompt) {
+        try {
+            const response = await fetch('https://europe-west1-quizquestionstorage.cloudfunctions.net/callOpenAI', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: prompt
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API call failed');
+            }
+
+            const data = await response.json();
+            return data.result;  // This should be the wrong options array
+        } catch (error) {
+            console.error('Error calling Firebase function:', error);
+            throw error;
+        }
+    }
+
+    // Create the prompt for the OpenAI API
+    const prompt = `"You're helping to create a multiple-choice quiz question. 
+    Given the question and the correct answer, generate three plausible and similar but incorrect options that are 
+    grammatically and structurally similar to the correct answer. The incorrect options should be difficult to distinguish the right answer.
+    
+
+Question: ${question}
+Correct Answer: ${correctAnswer}
+
+Please provide the incorrect options in a numbered JSON array without any additional text. The output should be in the following format:
+
+[
+"Wrong answer one.",
+"Wrong answer two.",
+"Wrong answer three."
+]`;
+
+    try {
+        console.log('Calling Firebase function with prompt:', prompt);  // Log the prompt for debugging
+        const apiResponse = await callFirebaseFunction(prompt);
+        
+        console.log('API Response:', apiResponse);  // Log the full API response
+        let wrongOptions = [];
+
+        try {
+            // Parse the incorrect options from the API response
+            wrongOptions = JSON.parse(apiResponse);
+        } catch (parseError) {
+            console.error('Error parsing wrong options from API response:', parseError);
+            alert('Failed to parse wrong options from the API response.');
+            return;
+        }
+
+        // Ensure there are exactly 3 wrong options
+        if (wrongOptions.length === 3) {
+            console.log('Generated Wrong Options:', wrongOptions);  // Log the options for debugging
+            return wrongOptions;
+        } else {
+            console.error('Failed to generate enough wrong options.');
+            alert('API did not return exactly three wrong options.');
+        }
+    } catch (error) {
+        console.error('Error generating wrong options:', error);
+        alert('Failed to generate wrong options.');
+    }
+}
+
+// Event listener for the "Generate 3 Options" button
+document.getElementById('generate-options-btn').addEventListener('click', async function() {
+    const question = document.getElementById('new-question').value;  // Get the user’s question
+    const correctAnswer = document.getElementById('correct-answer').value;  // Get the user’s correct answer
+
+    if (!question || !correctAnswer) {
+        alert('Please enter both a question and a correct answer!');
+        return;
+    }
+
+    // Call generateWrongOptions with both the question and correct answer
+    const wrongOptions = await generateWrongOptions(question, correctAnswer); 
+    if (wrongOptions && wrongOptions.length === 3) {
+        console.log('Setting wrong options in the textbox:', wrongOptions);  // Log the wrong options
+        document.getElementById('wrong-answers').value = wrongOptions.join(', ');
+    }
 });
