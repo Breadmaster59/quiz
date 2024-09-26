@@ -1104,8 +1104,8 @@ async function generateWrongOptions(question, correctAnswer) {
 
     // Create the prompt for the OpenAI API
     const prompt = `"You're helping to create a multiple-choice quiz question. 
-    Given the question and the correct answer, generate three plausible and similar but incorrect options that are 
-    grammatically and structurally similar to the correct answer. The incorrect options should be difficult to distinguish the right answe
+    Given the question and the correct answer, generate three plausible and similar options that are 
+    grammatically, factually and structurally similar to the correct answer. The incorrect options should be however, wrong.
     
 
 Question: ${question}
