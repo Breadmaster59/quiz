@@ -1104,12 +1104,12 @@ async function generateWrongOptions(question, correctAnswer) {
 
     // Create the prompt for the OpenAI API
     const prompt = `You're helping to create a multiple-choice quiz question. 
-    Given the question and the correct answer, generate three factually correct and similar structured that are factually correct but the incorrect answer for the question.
+    Given the question and the correct answer, generate three factually correct and similar structured answers that are slightly wrong.
 
 Question: ${question}
 Correct Answer: ${correctAnswer}
 
-Please provide the incorrect options in a numbered JSON array without any additional text. The output should be in the following format:
+Provide the incorrect options in a numbered JSON array without any additional text. Output should be in the following format:
 
 [
 "Wrong answer one.",
