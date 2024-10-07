@@ -1105,20 +1105,21 @@ async function generateWrongOptions(question, correctAnswer) {
 
   // Create the prompt for the OpenAI API
   const prompt = `You're helping to create a multiple-choice quiz question. 
-  Given the question and the correct answer, generate three plausible and similar structured answers that are wrong.
-  The quiz should be tough and the answers should include subject terminology, and not include obvious wrong options.
-  all answers should seem viable. Make at least 1 answer factually similar to the Correct one, sometimes more.
+Given the question and the correct answer, generate exactly three plausible and similarly structured answers that are wrong.
+The quiz should be tough, and the answers should include subject terminology and should not include obvious wrong options.
+All answers should seem viable. Make at least one answer factually similar to the correct one, sometimes more.
 
-Question: ${question}
-Correct Answer: ${correctAnswer}
-
-Provide the incorrect options in a numbered JSON array without any additional text. Output should be in the following format:
+Important: Provide the incorrect options in a numbered JSON array **without** any additional text or commentary. The output must be in the exact following format:
 
 [
 "Wrong answer one.",
 "Wrong answer two.",
 "Wrong answer three."
-]`;
+]
+
+Question: ${question}
+Correct Answer: ${correctAnswer}`;
+
 
 try {
     console.log('Calling Firebase function with prompt:', prompt);  // Log the prompt for debugging
